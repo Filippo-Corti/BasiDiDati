@@ -78,9 +78,6 @@ function showResults() {
 		$activites_cells = get_activites_row();
 	}
 	
-	
-	
-	
 	if(count($missing_fields) != 0) {
 		echo "Per favore <a href='form.php'> riprova </a>";
 	} else {
