@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Lab03</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="description" content="" />
+  <link rel="icon" href="favicon.png">
+</head>
+<body>
+	<style>
+	
+	form {
+		display: flex;
+		flex-direction: column;
+		gap: 5px;
+	}
+	
+	</style>
+	<h1>Login:</h1>
+	
+	<form method="POST" action="login1.php">
+		<div>
+			<label for="user">Username</label>
+			<input type="text" id="user" name="user" required>
+		</div>
+		<div>
+			<label for="password">Password</label>
+			<input type="password" id="password" name="password" required>
+		</div>
+		<div>
+			<input type="submit" value="Invia">
+			<input type="reset" value="Cancella">
+		</div>
+	</form>
+	
+</body>
+</html>

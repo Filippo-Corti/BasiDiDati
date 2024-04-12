@@ -1,0 +1,13 @@
+{
+  "libri": [
+    {
+   	"titolo": "Jurassic park",
+      	"autore": "Michael Crichton",
+      	"anno":1990	
+    },
+    {
+   	"titolo": "Il mondo perduto",
+      	"autore": "Michael Crichton",
+      	"anno":1995	
+    }  ]
+}
