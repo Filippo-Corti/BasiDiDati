@@ -24,6 +24,7 @@
 
     # Write CSV on File
     $fp = fopen("libri.csv", 'w');
+    fputcsv($fp, array_keys($libri_decoded["libri"][0]));  #CSV Header
     foreach($libri_decoded["libri"] as $libro) {
         fputcsv($fp, $libro);
     }
