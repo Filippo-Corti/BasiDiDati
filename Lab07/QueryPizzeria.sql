@@ -1,19 +1,19 @@
-1. Trovare i prezzi ed i nomi delle pizze che costano meno di 6 euro
+--1. Trovare i prezzi ed i nomi delle pizze che costano meno di 6 euro
 SELECT nome, prezzo
 FROM pizza
 WHERE prezzo < 6
 
-2. Trovare gli ingredienti delle pizze
+--2. Trovare gli ingredienti delle pizze
 SELECT * 
 FROM ingrediente
 
-3. Trovare il cognome, nome e telefono dei clienti che abitano in via dei
+--3. Trovare il cognome, nome e telefono dei clienti che abitano in via dei
 Girasoli ordinati per cognome e nome
 SELECT cognomec, nomec, telc
 FROM cliente
 WHERE via = 'via dei Girasoli'
 
-4. Trovare il numero di telefono dei clienti che hanno eettuato un ordine di
+--4. Trovare il numero di telefono dei clienti che hanno eettuato un ordine di
 almeno 5 pizze nell'ultima settimana, spendendo tra i 20 e i 50 euro
 SELECT telc, SUM(qta) AS NumeroPizze, SUM(importo) AS SpesaTotale
 FROM ordine
@@ -23,12 +23,12 @@ HAVING SUM(qta) >= 5
 	AND SUM(importo) >= 20
 	AND SUM(importo) <= 50
 
-5. Trovare il nome delle pizze ordinate in data 4 settembre 2009
+--5. Trovare il nome delle pizze ordinate in data 4 settembre 2009
 SELECT P.nome, O.data
 FROM ordine O NATURAL JOIN pizza P
 WHERE O.data = '2009/09/04'
 
-6. Trovare i nominativi dei clienti che hanno ordinato almeno una pizza che
+--6. Trovare i nominativi dei clienti che hanno ordinato almeno una pizza che
 contenga le olive di ogni genere (olive verdi, olive nere, pasta di olive
 ecc.), insieme alla data e all'importo dell'ordine; presentare il risultato
 ordinato in modo decrescente rispetto all'importo e, a parità di importo,
