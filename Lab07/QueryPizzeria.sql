@@ -201,7 +201,7 @@ WHERE telc NOT IN (
 
 /*24. Determinare quali pizze sono state ordinate da tutti i clienti*/
 SELECT codp, COUNT(DISTINCT telc)
-FROM ORDINE
+FROM ordine
 GROUP BY codp
 HAVING COUNT(DISTINCT telc) = (
 	SELECT COUNT(*)
