@@ -66,14 +66,143 @@ ORDER BY C.cognomec , C.nomec, O.data DESC
 
 /*10. Trovare il numero totale, l'importo totale e medio degli ordini dei clienti
 ed inne il numero di pizze diverse ordinate*/
+SELECT COUNT(*) AS NumeroOrdini, SUM(importo) AS ImportoTotale, AVG(importo) AS ImportoMedio, COUNT(DISTINCT codp) AS PizzeDiverse
+FROM ordine
+
+/*11. Trovare, per ogni cliente che abbia ordinato almeno una pizza, il numero
+totale, l'importo totale e medio dei suoi ordini ed infine il numero di pizze
+diverse ordinate*/
 SELECT telc, COUNT(*) AS NumeroOrdini, SUM(importo) AS ImportoTotale, AVG(importo) AS ImportoMedio, COUNT(DISTINCT codp) AS PizzeDiverse
 FROM ordine
 GROUP BY telc
 
+/*12. Trovare il nome delle pizze appartenenti ad ordini del 2021 il cui importo
+risulti essere inferiore al prezzo per la quantità ordinata*/
+SELECT P.nome, O.importo AS ImportoPagato, P.prezzo * O.qta AS ImportoDaPagare
+FROM ordine O NATURAL JOIN pizza P
+WHERE DATE_PART('year', O.data) = 2021
+AND O.importo < P.prezzo * O.qta
 
+/*13. Trovare il codice delle pizze con almeno 3 ingredienti restituendo anche il
+numero di ingredienti effettivi*/
+SELECT codp, COUNT(*) AS NumeroIngredienti
+FROM ingrediente
+GROUP BY codp
+HAVING COUNT(*) >= 3
 
+/*14. Trovare il codice delle pizze con il maggior numero di ingredienti
+restituendo anche il numero di ingredienti effettivi*/
+SELECT codp, COUNT(*) AS NumeroIngredienti
+FROM ingrediente
+GROUP BY codp
+HAVING COUNT(*) >= ALL (
+	SELECT COUNT(*)
+	FROM ingrediente
+	GROUP BY codp
+)
 
+/*15. Restituire in una singola colonna, cognome e nome dei clienti che hanno
+ordinato il minor numero di pizze margherita (ma almeno una)*/
+DROP VIEW PizzeMargheritaOrdinate; --Per poter rieseguire la Query
 
+CREATE VIEW PizzeMargheritaOrdinate(telc, num)
+AS SELECT *
+	  FROM ordine
+	  WHERE codp = (
+	  	SELECT codp
+		FROM pizza
+		WHERE nome = 'margherita');
 
+SELECT CONCAT(C.nomec, ' ', C.cognomec) AS NomeCompleto
+FROM PizzeMargheritaOrdinate NATURAL JOIN cliente C
+GROUP BY C.nomec, C.cognomec
+HAVING COUNT(*) <= ALL
+	(SELECT COUNT(*)
+	FROM PizzeMargheritaOrdinate
+	GROUP BY telc)
 
+/*16. Trovare i clienti che hanno ordinato (almeno una volta) la pizza
+capricciosa oppure ai quattro formaggi*/
+SELECT DISTINCT nomec, cognomec
+FROM ordine NATURAL JOIN cliente
+WHERE codp IN (
+	SELECT codp
+	FROM pizza
+	WHERE nome IN ('capricciosa', 'quattro formaggi'))
 
+/*17. Trovare i clienti che hanno ordinato (almeno una volta) la pizza
+capricciosa oppure ai quattro formaggi usando gli operatori insiemistici*/
+(SELECT telc
+FROM ordine NATURAL JOIN pizza
+WHERE nome = 'capricciosa')
+UNION 
+(SELECT telc
+FROM ordine NATURAL JOIN pizza
+WHERE nome = 'quattro formaggi')
+
+/*18. Trovare le pizze che contengono sia mozzarella sia olive usando gli
+operatori insiemistici*/
+SELECT codp, nome
+FROM pizza NATURAL JOIN ingrediente
+WHERE ingrediente = 'mozzarella'
+INTERSECT 
+SELECT codp, nome
+FROM pizza NATURAL JOIN ingrediente
+WHERE ingrediente = 'olive'
+
+/*19. Trovare le pizze che contengono sia mozzarella sia olive usando
+l'operatore IN*/
+SELECT codp, nome
+FROM pizza NATURAL JOIN ingrediente
+WHERE ingrediente = 'mozzarella'
+AND codp IN (
+	SELECT codp
+	FROM ingrediente
+	WHERE ingrediente = 'olive')
+
+/*20. Trovare le pizze che contengono sia mozzarella sia olive usando
+l'operatore EXISTS*/
+SELECT codp, nome
+FROM pizza P1 NATURAL JOIN ingrediente
+WHERE ingrediente = 'mozzarella'
+AND EXISTS (
+	SELECT codp
+	FROM  ingrediente
+	WHERE ingrediente = 'olive'
+	AND P1.codp = codp)
+
+/*21. Determinare il numero di telefono ed i cognome dei clienti che hanno
+fatto solo ordini superiori ai 7 euro*/
+SELECT telc, cognomec
+FROM cliente
+WHERE telc <> ALL (
+	SELECT telc
+	FROM ordine
+	WHERE importo <= 7)
+
+/*22. Determinare i numeri di telefono ed i nominativi dei clienti che hanno
+fatto solo ordini superiori ai 7 euro usando NOT EXISTS*/
+SELECT telc, cognomec
+FROM cliente C
+WHERE NOT EXISTS (
+	SELECT telc
+	FROM ordine
+	WHERE importo <= 7
+	AND C.telc = telc)
+
+/*23. Determinare i numeri di telefono ed i nominativi dei clienti che hanno
+fatto solo ordini superiori ai 7 euro usando NOT IN*/
+SELECT telc, cognomec
+FROM cliente C
+WHERE telc NOT IN (
+	SELECT telc
+	FROM ordine
+	WHERE importo <= 7)
+
+/*24. Determinare quali pizze sono state ordinate da tutti i clienti*/
+SELECT codp, COUNT(DISTINCT telc)
+FROM ORDINE
+GROUP BY codp
+HAVING COUNT(DISTINCT telc) = (
+	SELECT COUNT(*)
+	FROM cliente)
