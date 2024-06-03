@@ -31,65 +31,13 @@ function fillInsertForm()
   $formFields = array();
 
   $connection = connectToDatabase();
+
   $columns = pg_fetch_all(getColumnsInformation($connection, $_GET['table']));
-
-  //Check for eventual Foreign Key Constraints
   $foreignKeys = getForeignKeyConstraints($connection, $_GET['table']);
-  $referencedTables = array_unique(array_map(fn ($el) => $el['referredtable'], $foreignKeys));
 
-  foreach ($referencedTables as $referencedTable) {
-    //Find Referenced and Referring Columns
-    $referencedData = array_filter($foreignKeys, function ($el) use ($referencedTable) {
-      return $el['referredtable'] == $referencedTable;
-    });
-    $referencedColumns = array_map(fn ($el) => $el['referredcolumn'], $referencedData);
-    $referringColumns = array_map(fn ($el) => ucfirst($el['column_name']), $referencedData);
-    $referencedColumnsString = implode(", ", $referencedColumns);
-    $referringColumnsString = implode(" - ", $referringColumns);
-    //Execute Query to get Selection Data 
-    $query = "SELECT {$referencedColumnsString} FROM {$referencedTable}";
-    $dataForSelectInput = executeQuery($connection, $query);
-    $dataForSelectInput = array_map(fn ($el) => implode(' - ', $el), pg_fetch_all($dataForSelectInput));
-    //Create Selection
-    $positionInPage = array_filter($columns, fn($el) => in_array(ucfirst($el['column_name']), $referringColumns));
-    $index = max(array_map(fn($el) => $el['ordinal_position'], $positionInPage));
-    $formFields[$index] = buildInputSelect($referringColumnsString, $dataForSelectInput, false);
-    //Remove Referred Columns so that they don't appear again
-    $columns = array_filter($columns, fn($el) => !in_array(ucfirst($el['column_name']), $referringColumns));
-  }
+  $formFields = array_merge($formFields, getReferentialInputFields($connection, $columns, $foreignKeys));
+  $formFields = array_merge($formFields, getStandardInputFields($connection, $columns));
 
-  foreach ($columns as $row) {
-    $name = ucfirst($row['column_name']);
-
-    //Find correct Input
-    $field_type = $row['udt_name'];
-    switch ($field_type) {
-      case 'bpchar':
-        $formFields[$row['ordinal_position']] = buildInputText($name, $row['character_maximum_length'], $row['character_maximum_length'], $row['is_nullable'] == 'NO');
-        break;
-      case 'varchar':
-        $formFields[$row['ordinal_position']] = buildInputText($name, 0, $row['character_maximum_length'], $row['is_nullable'] == 'NO');
-        break;
-      case 'numeric':
-        $formFields[$row['ordinal_position']] = buildInputNumber($name, $row['numeric_precision'], $row['numeric_scale'], $row['is_nullable'] == 'NO');
-        break;
-      case 'date':
-        $formFields[$row['ordinal_position']] = buildInputDate($name, $row['is_nullable'] == 'NO');
-        break;
-      case 'time':
-        $formFields[$row['ordinal_position']] = buildInputTime($name, $row['is_nullable'] == 'NO');
-        break;
-      case 'timestamp':
-        $formFields[$row['ordinal_position']] = buildInputDateTime($name, $row['is_nullable'] == 'NO');
-        break;
-      default:
-        //User-defined Enum
-        $query = "SELECT enum_range(NULL::{$field_type})";
-        $result = executeQuery($connection, $query);
-        $enumValues = substr(pg_fetch_array($result)['enum_range'], 1, -1); //Trim { and }
-        $formFields[$row['ordinal_position']] = buildInputSelect($name, explode(',', $enumValues), $row['is_nullable'] == 'NO');
-    }
-  }
   ksort($formFields);
   return implode('', $formFields);
 }
@@ -117,6 +65,75 @@ function getForeignKeyConstraints($connection, $tableName)
   QRY;
   $results = executeQuery($connection, $query, array($tableName));
   return pg_fetch_all($results);
+}
+
+function getStandardInputFields($connection, &$columns)
+{
+  $formFields = array();
+  foreach ($columns as $col) {
+    $formFields[$col['ordinal_position']] = getCorrectInputField($connection, $col);
+  }
+  return $formFields;
+}
+
+function getCorrectInputField($connection, $column_data)
+{
+  $name = ucfirst($column_data['column_name']);
+  $field_type = $column_data['udt_name'];
+  switch ($field_type) {
+    case 'bpchar':
+      return buildInputText($name, $column_data['character_maximum_length'], $column_data['character_maximum_length'], $column_data['is_nullable'] == 'NO');
+      break;
+    case 'varchar':
+      return buildInputText($name, 0, $column_data['character_maximum_length'], $column_data['is_nullable'] == 'NO');
+      break;
+    case 'numeric':
+      return buildInputNumber($name, $column_data['numeric_precision'], $column_data['numeric_scale'], $column_data['is_nullable'] == 'NO');
+      break;
+    case 'date':
+      return buildInputDate($name, $column_data['is_nullable'] == 'NO');
+      break;
+    case 'time':
+      return buildInputTime($name, $column_data['is_nullable'] == 'NO');
+      break;
+    case 'timestamp':
+      return buildInputDateTime($name, $column_data['is_nullable'] == 'NO');
+      break;
+    default:
+      //User-defined Enum
+      $query = "SELECT enum_range(NULL::{$field_type})";
+      $result = executeQuery($connection, $query);
+      $enumValues = substr(pg_fetch_array($result)['enum_range'], 1, -1); //Trim { and }
+      return buildInputSelect($name, explode(',', $enumValues), $column_data['is_nullable'] == 'NO');
+  }
+}
+
+function getReferentialInputFields($connection, &$columns, $foreignKeys)
+{
+  $formFields = array();
+  $referencedTables = array_unique(array_map(fn ($el) => $el['referredtable'], $foreignKeys));
+  foreach ($referencedTables as $referencedTable) {
+    //Find Referenced and Referring Columns
+    $referencedData = array_filter($foreignKeys, function ($el) use ($referencedTable) {
+      return $el['referredtable'] == $referencedTable;
+    });
+    $referencedColumns = array_map(fn ($el) => $el['referredcolumn'], $referencedData);
+    $referringColumns = array_map(fn ($el) => ucfirst($el['column_name']), $referencedData);
+    $referencedColumnsString = implode(", ", $referencedColumns);
+    $referringColumnsString = implode(" - ", $referringColumns);
+    //Execute Query to get Selection Data 
+    $query = "SELECT {$referencedColumnsString} FROM {$referencedTable}";
+    $dataForSelectInput = executeQuery($connection, $query);
+    $dataForSelectInput = array_map(fn ($el) => implode(' - ', $el), pg_fetch_all($dataForSelectInput));
+    //Create Selection
+    $positionInPage = array_filter($columns, fn ($el) => in_array(ucfirst($el['column_name']), $referringColumns));
+    $index = max(array_map(fn ($el) => $el['ordinal_position'], $positionInPage));
+    $isRequired = in_array("NO", array_map(fn ($el) => ucfirst($el['is_nullable']), array_filter($columns, fn ($el) => in_array(ucfirst($el['column_name']), $referringColumns))));
+    $formFields[$index] = buildInputSelect($referringColumnsString, $dataForSelectInput, $isRequired);
+    //Remove Referred Columns so that they don't appear again
+    $columns = array_filter($columns, fn ($el) => !in_array(ucfirst($el['column_name']), $referringColumns));
+  }
+  return $formFields;
 }
 
 ?>
