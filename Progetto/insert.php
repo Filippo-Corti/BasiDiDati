@@ -71,12 +71,23 @@ function getStandardInputFields($connection, &$columns)
 {
   $formFields = array();
   foreach ($columns as $col) {
-    $formFields[$col['ordinal_position']] = getCorrectInputField($connection, $col);
+    $formFields[$col['ordinal_position']] = getStandardInputField($connection, $col);
   }
   return $formFields;
 }
 
-function getCorrectInputField($connection, $column_data)
+function getReferentialInputFields($connection, &$columns, $foreignKeys)
+{
+  $formFields = array();
+  $referencedTables = array_unique(array_map(fn ($el) => $el['referredtable'], $foreignKeys));
+  foreach ($referencedTables as $referencedTable) {
+    $formField = getReferentialInputField($connection, $columns, $foreignKeys, $referencedTable, $index);
+    $formFields[$index] = $formField;
+  }
+  return $formFields;
+}
+
+function getStandardInputField($connection, $column_data)
 {
   $name = ucfirst($column_data['column_name']);
   $field_type = $column_data['udt_name'];
@@ -108,32 +119,32 @@ function getCorrectInputField($connection, $column_data)
   }
 }
 
-function getReferentialInputFields($connection, &$columns, $foreignKeys)
+function getReferentialInputField($connection, &$columns, $foreignKeys, $referencedTable, &$index)
 {
-  $formFields = array();
-  $referencedTables = array_unique(array_map(fn ($el) => $el['referredtable'], $foreignKeys));
-  foreach ($referencedTables as $referencedTable) {
-    //Find Referenced and Referring Columns
-    $referencedData = array_filter($foreignKeys, function ($el) use ($referencedTable) {
-      return $el['referredtable'] == $referencedTable;
-    });
-    $referencedColumns = array_map(fn ($el) => $el['referredcolumn'], $referencedData);
-    $referringColumns = array_map(fn ($el) => ucfirst($el['column_name']), $referencedData);
-    $referencedColumnsString = implode(", ", $referencedColumns);
-    $referringColumnsString = implode(" - ", $referringColumns);
-    //Execute Query to get Selection Data 
-    $query = "SELECT {$referencedColumnsString} FROM {$referencedTable}";
-    $dataForSelectInput = executeQuery($connection, $query);
-    $dataForSelectInput = array_map(fn ($el) => implode(' - ', $el), pg_fetch_all($dataForSelectInput));
-    //Create Selection
-    $positionInPage = array_filter($columns, fn ($el) => in_array(ucfirst($el['column_name']), $referringColumns));
-    $index = max(array_map(fn ($el) => $el['ordinal_position'], $positionInPage));
-    $isRequired = in_array("NO", array_map(fn ($el) => ucfirst($el['is_nullable']), array_filter($columns, fn ($el) => in_array(ucfirst($el['column_name']), $referringColumns))));
-    $formFields[$index] = buildInputSelect($referringColumnsString, $dataForSelectInput, $isRequired);
-    //Remove Referred Columns so that they don't appear again
-    $columns = array_filter($columns, fn ($el) => !in_array(ucfirst($el['column_name']), $referringColumns));
-  }
-  return $formFields;
+  //Find Referenced and Referring Columns
+  $referencedData = array_filter($foreignKeys, function ($el) use ($referencedTable) {
+    return $el['referredtable'] == $referencedTable;
+  });
+  $referencedColumns = array_map(fn ($el) => $el['referredcolumn'], $referencedData);
+  $referencedColumnsString = implode(", ", $referencedColumns);
+  $referringColumns = array_map(fn ($el) => ucfirst($el['column_name']), $referencedData);
+  $referringColumnsString = implode(" - ", $referringColumns);
+
+  //Execute Query to get Selection Data 
+  $query = "SELECT {$referencedColumnsString} FROM {$referencedTable}";
+  $dataForSelectInput = executeQuery($connection, $query);
+  $dataForSelectInput = array_map(fn ($el) => implode(' - ', $el), pg_fetch_all($dataForSelectInput));
+
+  //Find Correct Index in the Page 
+  $positionInPage = array_filter($columns, fn ($el) => in_array(ucfirst($el['column_name']), $referringColumns));
+  $index = max(array_map(fn ($el) => $el['ordinal_position'], $positionInPage));
+  $isRequired = in_array("NO", array_map(fn ($el) => ucfirst($el['is_nullable']), array_filter($columns, fn ($el) => in_array(ucfirst($el['column_name']), $referringColumns))));
+
+  //Remove Referred Columns so that they don't get evaluated again
+  $columns = array_filter($columns, fn ($el) => !in_array(ucfirst($el['column_name']), $referringColumns));
+
+  return buildInputSelect($referringColumnsString, $dataForSelectInput, $isRequired);
 }
+
 
 ?>
