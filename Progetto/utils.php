@@ -1,4 +1,5 @@
 <?php
+error_reporting(E_ERROR); //Hides Warnings
 
 // General Purpose
 function getRequired($r)
@@ -11,32 +12,33 @@ function connectToDatabase()
 {
     include 'vars.php';
 
-    $connection = pg_connect($connectionString);
+    $connection = pg_connect($connectionString_Admin);
     if (!$connection) {
-        echo 'Connessione al database fallita.';
+        echo '<br> Connessione al database fallita. <br>';
         exit();
     }
     return $connection;
 }
 
-function executeQuery($connection, $query, $params = NULL) {
+function executeQuery($connection, $query, $params = NULL)
+{
     if (!$params) {
         $result = pg_query($connection, $query);
     } else {
         $result = pg_query_params($connection, $query, $params);
     }
     if (!$result) {
-      echo "Si è verificato un errore.";
-      echo pg_last_error($connection);
-      exit();
+        echo "<br> Si è verificato un errore. <br>";
+        echo pg_last_error($connection);
+        exit();
     }
     return $result;
 }
 
 function getColumnsInformation($connection, $tableName)
 {
-  $query = "SELECT * FROM information_schema.columns WHERE table_name = $1 ORDER BY ordinal_position";
-  return executeQuery($connection, $query, array($tableName));
+    $query = "SELECT * FROM information_schema.columns WHERE table_name = $1 ORDER BY ordinal_position";
+    return executeQuery($connection, $query, array($tableName));
 }
 
 
@@ -134,10 +136,10 @@ function buildInputSelect($name, $options, $required)
 
     $getRequired = getRequired($required);
     $optionsStr = "";
-    foreach($options as $option) {
+    foreach ($options as $option) {
         $optionsStr .= "<option value='{$option}'>{$option}</option>";
     }
-    
+
     return <<<EOD
         <label class="form-label" for="{$name}">{$name}:</label>
         <select class="form-select rounded-pill" name="{$name}" id="{$name}" {$getRequired}>
