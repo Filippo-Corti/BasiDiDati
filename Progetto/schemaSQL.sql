@@ -20,7 +20,8 @@ CREATE TABLE Paziente (
 	CAP VARCHAR(5) NOT NULL,
 	Via VARCHAR(30) NOT NULL,
 	nCiv DECIMAL(3, 0) NOT NULL,
-	UNIQUE (NumeroTessera)
+	UNIQUE (NumeroTessera),
+	CHECK (nCiv > 0)
 );
 
 CREATE TABLE Ospedale (
@@ -28,7 +29,8 @@ CREATE TABLE Ospedale (
 	Nome VARCHAR(30) NOT NULL,
 	CAP VARCHAR(5) NOT NULL,
 	Via VARCHAR(30) NOT NULL,
-	nCiv DECIMAL(3, 0) NOT NULL
+	nCiv DECIMAL(3, 0) NOT NULL,
+	CHECK (nCiv > 0)
 );
 
 CREATE TABLE Reparto (
@@ -48,7 +50,8 @@ CREATE TABLE Personale (
 	CAP VARCHAR(5) NOT NULL,
 	Via VARCHAR(30) NOT NULL,
 	nCiv DECIMAL(3, 0) NOT NULL,
-	Reparto CHAR(5) REFERENCES Reparto(Codice) ON UPDATE CASCADE
+	Reparto CHAR(5) REFERENCES Reparto(Codice) ON UPDATE CASCADE,
+	CHECK (nCiv > 0)
 );
 
 CREATE TABLE PersonaleAmministrativo (
@@ -152,7 +155,8 @@ CREATE TABLE LaboratorioEsterno (
 	CAP VARCHAR(5) NOT NULL,
 	Via VARCHAR(30) NOT NULL,
 	nCiv DECIMAL(3, 0) NOT NULL,
-	FOREIGN KEY (Codice) REFERENCES Laboratorio(Codice) ON UPDATE CASCADE
+	FOREIGN KEY (Codice) REFERENCES Laboratorio(Codice) ON UPDATE CASCADE,
+	CHECK (nCiv > 0)
 );
 
 CREATE TABLE CollaborazioneOspedaleLaboratorio (

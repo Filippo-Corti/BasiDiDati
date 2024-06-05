@@ -1,0 +1,52 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+:root {
+    --color-accent: rgba(73, 37, 233, 1);
+    --color-accent-opacity-3: rgba(73, 37, 233, 0.3);
+}
+
+a {
+    text-decoration: none !important;
+}
+
+.poppins {
+    font-family: "Poppins", sans-serif;
+}
+
+body {
+    font-family: "Poppins", sans-serif;
+    font-weight: 400;
+    font-style: normal;
+    background-color: #FAFBFF  !important;
+}
+
+.btn-mine-light, .btn-mine {
+    padding: 0.5rem 1.5rem;
+    color: var(--color-accent) !important;
+    font-weight: 700 !important;
+    font-size: 16px !important;
+    box-shadow: 0 0.2rem 0.5rem var(--color-accent-opacity-3);
+}
+
+.btn-mine {
+    color: white !important;
+    background-color: var(--color-accent) !important;
+}
+
+.btn-mine-light:hover {
+    color: white !important;
+    background-color: var(--color-accent) !important;
+}
+
+.btn-mine:hover {
+    color: var(--color-accent) !important;
+    background-color: white !important;
+}
+
+.shadow-accent {
+    box-shadow: 0 0.2rem 0.5rem rgba(73, 37, 233, 0.1);
+}
+
+.text-green {
+    color: #17b792
+}

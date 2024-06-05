@@ -41,8 +41,8 @@ function buildInputText($name, $minsize, $maxsize, $required)
     $getRequired = getRequired($required);
 
     return <<<EOD
-        <label for="{$name}">{$name}:</label>
-        <input type="{$name}" name="text" id="{$name}" minlength="{$minsize}" maxlength="{$maxsize}" {$getRequired}>
+        <label class="form-label" for="{$name}">{$name}:</label>
+        <input class="form-control rounded-pill" type="{$name}" name="text" id="{$name}" minlength="{$minsize}" maxlength="{$maxsize}" {$getRequired}>
         <br>
     EOD;
 }
@@ -54,8 +54,8 @@ function buildInputNumber($name, $totalDigits, $decimalDigits, $required)
     $decimalPrecision = 1 / pow(10, $decimalDigits);
 
     return <<<EOD
-        <label for="{$name}">{$name}:</label>
-        <input name="{$name}" type="number" max="{$maxNumber}" step="{$decimalPrecision}" {$getRequired}>
+        <label class="form-label" for="{$name}">{$name}:</label>
+        <input class="form-control rounded-pill" name="{$name}" type="number" max="{$maxNumber}" step="{$decimalPrecision}" {$getRequired}>
         <br>
     EOD;
 }
@@ -63,8 +63,8 @@ function buildInputNumber($name, $totalDigits, $decimalDigits, $required)
 function buildInputBoolean($name)
 {
     return <<<EOD
-        <label for="{$name}">{$name}:</label>
-        <input name="{$name}" type="checkbox">
+        <label class="form-label" for="{$name}">{$name}:</label>
+        <input class="form-control rounded-pill" name="{$name}" type="checkbox">
         <br>
     EOD;
 }
@@ -74,8 +74,8 @@ function buildInputDate($name, $required)
     $getRequired = getRequired($required);
 
     return <<<EOD
-        <label for="{$name}">{$name}:</label>
-        <input name="{$name}" type="date" {$getRequired}>
+        <label class="form-label" for="{$name}">{$name}:</label>
+        <input class="form-control rounded-pill" name="{$name}" type="date" {$getRequired}>
         <br>
     EOD;
 }
@@ -85,8 +85,8 @@ function buildInputTime($name, $required)
     $getRequired = getRequired($required);
 
     return <<<EOD
-        <label for="{$name}">{$name}:</label>
-        <input name="{$name}" type="time" {$getRequired}>
+        <label class="form-label" for="{$name}">{$name}:</label>
+        <input class="form-control rounded-pill" name="{$name}" type="time" {$getRequired}>
         <br>
     EOD;
 }
@@ -96,8 +96,8 @@ function buildInputDateTime($name, $required)
     $getRequired = getRequired($required);
 
     return <<<EOD
-        <label for="{$name}">{$name}:</label>
-        <input name="{$name}" type="datetime-local" {$getRequired}>
+        <label class="form-label" for="{$name}">{$name}:</label>
+        <input class="form-control rounded-pill" name="{$name}" type="datetime-local" {$getRequired}>
         <br>
     EOD;
 }
@@ -112,8 +112,8 @@ function buildInputSelect($name, $options, $required)
     }
     
     return <<<EOD
-        <label for="{$name}">{$name}:</label>
-        <select name="{$name}" id="{$name}" {$getRequired}>
+        <label class="form-label" for="{$name}">{$name}:</label>
+        <select class="form-select rounded-pill" name="{$name}" id="{$name}" {$getRequired}>
         <option value="" selected>--</option>
         {$optionsStr}
         </select>
