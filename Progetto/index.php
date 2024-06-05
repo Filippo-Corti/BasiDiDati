@@ -57,7 +57,22 @@
             </div>
         </div>
 
+        <?php 
+        
+        $a = 'abcd'; 
+        $b = password_hash($a, PASSWORD_DEFAULT); 
+
+        if (password_verify($a, $b)) {
+            echo "Passwords ok";
+            echo "<br>";
+            echo $b;
+        } else {
+            echo "Password not ok";
+        }
+
+        ?>
     </section>
+
 
 
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
