@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8" />
-    <title>Dashboard | Gestore Aziende Ospedaliere
+    <title>Visualizzazione | Gestore Aziende Ospedaliere
     </title>
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <link rel="icon" href="img/logo.svg">
@@ -38,21 +38,27 @@
     </header>
 
     <section class="container mx-auto">
-        <div class="my-5 mx-4">
-            <div class="rounded-5 p-5 bg-white shadow-accent">
-                <div class="d-flex align-items-center justify-content-between gap-1">
-                    <div class="pb-1 fw-semibold">
-                        <p class="my-0 py-0 text-green fw-semibold fs-6" style="transform:translateY(4px);">Inserimento
+        <div class="my-5 mx-2">
+            <div class="rounded-5 py-5 px-3 bg-white shadow-accent">
+                <div class="px-3 d-flex align-items-center justify-content-between gap-1">
+                    <div class="pb-1fw-semibold">
+                        <p class="my-0 py-0 text-green fw-semibold fs-6" style="transform:translateY(4px);">
+                            Visualizzazione
                         </p>
-                        <h3 class="m-0 p-0 fw-bold">Paziente</h3>
+                        <h3 class="m-0 p-0 fw-bold">
+                            <?php echo ucfirst($_GET['table']) ?>
+                        </h3>
                     </div>
                     <div>
                         <a class="d-flex flex-columns align-items-center justify-content-center" href="">
-                            <button class="btn rounded-pill btn-mine">
-                                <span class="poppins fw-normal"> &gt;</span> Visualizza la Tabella
+                            <button class="btn rounded-pill btn-mine ">
+                                <span class="poppins fw-normal"> &gt;</span> Inserisci nella Tabella
                             </button>
                         </a>
                     </div>
+                </div>
+                <div class="d-flex justify-content-center mt-3">
+                    <?php echo loadTable(); ?>
                 </div>
             </div>
         </div>
@@ -69,3 +75,22 @@
 </body>
 
 </html>
+
+<?php
+
+function loadTable()
+{
+
+    include 'utils.php';
+
+    $tableName = $_GET['table'];
+    $connection = connectToDatabase();
+    $query = "SELECT * FROM {$tableName}";
+    $results = pg_fetch_all(executeQuery($connection, $query));
+    $columns = array_map(fn($el) => $el['column_name'], pg_fetch_all(getColumnsInformation($connection, $tableName)));
+
+    return buildTable($results, $columns);
+}
+
+
+?>

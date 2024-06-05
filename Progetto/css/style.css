@@ -1,8 +1,15 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
 
+/* General Purpose */
 :root {
     --color-accent: rgba(73, 37, 233, 1);
     --color-accent-opacity-3: rgba(73, 37, 233, 0.3);
+
+    --color-edit: rgba(23, 183, 146, 1);
+    --color-edit-opacity-3: rgba(23, 183, 146, 0.3);
+
+    --color-delete: rgb(227, 35, 18);
+    --color-delete-opacity-3: rgba(227, 35, 18, 0.3);
 }
 
 a {
@@ -17,10 +24,37 @@ body {
     font-family: "Poppins", sans-serif;
     font-weight: 400;
     font-style: normal;
-    background-color: #FAFBFF  !important;
+    background-color: #FAFBFF !important;
 }
 
-.btn-mine-light, .btn-mine {
+/* Tables */
+
+table {
+    font-size: clamp(0.688rem, -0.023rem + 1.136vi, 1rem) !important;
+}
+
+tr {
+    border-bottom: 1px solid rgb(222, 226, 230) !important;
+}
+
+td,
+th {
+    padding: 0.8rem 1rem !important;
+}
+
+th {
+    font-weight: 400;
+    color: rgb(108, 117, 125);
+}
+
+td {
+    font-weight: 500;
+}
+
+
+/* Buttons */
+.btn-mine-light,
+.btn-mine, .btn-edit, .btn-delete {
     padding: 0.5rem 1.5rem;
     color: var(--color-accent) !important;
     font-weight: 700 !important;
@@ -33,7 +67,7 @@ body {
     background-color: var(--color-accent) !important;
 }
 
-.btn-mine-light:hover {
+.btn-mine-light:hover{
     color: white !important;
     background-color: var(--color-accent) !important;
 }
@@ -43,6 +77,28 @@ body {
     background-color: white !important;
 }
 
+.btn-edit {
+    color: var(--color-edit) !important;
+    box-shadow: 0 0.2rem 0.5rem var(--color-edit-opacity-3);
+}
+
+.btn-edit:hover{
+    color: white !important;
+    background-color: var(--color-edit) !important;
+}
+
+.btn-delete {
+    color: var(--color-delete) !important;
+    box-shadow: 0 0.2rem 0.5rem var(--color-delete-opacity-3);
+}
+
+.btn-delete:hover{
+    color: white !important;
+    background-color: var(--color-delete) !important;
+}
+
+
+/* Others */
 .shadow-accent {
     box-shadow: 0 0.2rem 0.5rem rgba(73, 37, 233, 0.1);
 }

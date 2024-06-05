@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8" />
-    <title>Dashboard | Gestore Aziende Ospedaliere
+    <title>Inserimento | Gestore Aziende Ospedaliere
     </title>
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <link rel="icon" href="img/logo.svg">
@@ -38,9 +38,9 @@
     </header>
 
     <section class="container mx-auto">
-        <div class="my-5 mx-4">
-            <div class="rounded-5 p-5 bg-white shadow-accent">
-                <div class="d-flex align-items-center justify-content-between gap-1">
+        <div class="my-5 mx-2">
+            <div class="rounded-5 py-5 px-3 bg-white shadow-accent">
+                <div class="px-3 d-flex align-items-center justify-content-between gap-1">
                     <div class="pb-1 fw-semibold">
                         <p class="my-0 py-0 text-green fw-semibold fs-6" style="transform:translateY(4px);">Inserimento
                         </p>
@@ -56,7 +56,7 @@
                         </a>
                     </div>
                 </div>
-                <div class="mt-3">
+                <div class="m-3">
                   <form action="">
 
                   <?php echo fillInsertForm();  ?>
@@ -104,11 +104,6 @@ function fillInsertForm()
   return implode('', $formFields);
 }
 
-function getColumnsInformation($connection, $tableName)
-{
-  $query = "SELECT * FROM information_schema.columns WHERE table_name = $1 ORDER BY ordinal_position";
-  return executeQuery($connection, $query, array($tableName));
-}
 
 function getForeignKeyConstraints($connection, $tableName)
 {

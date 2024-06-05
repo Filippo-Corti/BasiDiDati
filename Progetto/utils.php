@@ -33,7 +33,34 @@ function executeQuery($connection, $query, $params = NULL) {
     return $result;
 }
 
+function getColumnsInformation($connection, $tableName)
+{
+  $query = "SELECT * FROM information_schema.columns WHERE table_name = $1 ORDER BY ordinal_position";
+  return executeQuery($connection, $query, array($tableName));
+}
 
+
+function buildTable($results, $columns)
+{
+    //Intestation
+    $str = '<table class="w-100">';
+    $str .= '<tr>';
+    foreach ($columns as $col) {
+        $col = ucfirst($col);
+        $str .= "<th> {$col} </th>";
+    }
+    $str .= "<th> Actions </th>";
+    $str .= '</tr>';
+    foreach ($results as $row) {
+        $str .= '<tr>';
+        foreach ($columns as $col) {
+            $str .= "<td> {$row[$col]} </td>";
+        }
+        $str .= "<td><button class='btn btn-edit'>Edit</button> <button class='btn btn-delete'>Delete</button> </td>";
+        $str .= '</tr>';
+    }
+    return $str . '</table>';
+}
 
 //Build Input
 function buildInputText($name, $minsize, $maxsize, $required)
