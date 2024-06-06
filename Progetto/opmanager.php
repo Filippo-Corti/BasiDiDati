@@ -16,14 +16,17 @@ switch ($operation) {
         insertIntoDatabase($connection, $table, $names, $values);
         header("Location: /basididati/progetto/index.php");
         exit();
-    case 'update':
-        echo "Update: <br>";
-        print_r($_POST);
-        break;
-    case 'delete':
-        deleteDatabase($connection, $table);
+    case 'toupdate': //Redirect to Edit Page
+        header("Location: /basididati/progetto/edit.php");
+        exit();
+    case 'update': //Actually update the DB
+        updateIntoDatabase($connection, $table, $names, $values);
         header("Location: /basididati/progetto/index.php");
-        break;
+        exit();
+    case 'delete':
+        deleteFromDatabase($connection, $table);
+        header("Location: /basididati/progetto/index.php");
+        exit();
 
 }
 
@@ -37,7 +40,7 @@ function insertIntoDatabase($connection, $table, $attributes, $values)
     }
 }
 
-function deleteDatabase($connection, $table) {
+function deleteFromDatabase($connection, $table) {
     $pkeys = getPrimaryKey($connection, $table);
     $findCondition = "WHERE ";
     foreach($_POST as $k => $v) {
@@ -52,6 +55,25 @@ function deleteDatabase($connection, $table) {
     } catch (Exception $e) {
         notifyError($e->getMessage());
     }
+}
+
+function updateIntoDatabase($connection, $table, $names, $values) {
+    $pkeys = getPrimaryKey($connection, $table);
+    $findCondition = "WHERE ";
+    $editCondition = "";
+    foreach($_POST as $k => $v) {
+        if (in_array($k, $pkeys)) {
+            $findCondition .= "{$k} = '{$v}' AND ";
+        } else {
+            $editCondition .= "{$k} = '{$v}', ";
+        }
+    }
+    $findCondition = substr($findCondition, 0, -4);
+    $editCondition = substr($editCondition, 0, -2);
+    $query = "UPDATE {$table} SET {$editCondition} {$findCondition}";
+    echo "<br>";
+    echo $query;
+
 }
 
 //Adjusts Post array to get all and only attributes for the table

@@ -58,10 +58,10 @@
                 </div>
                 <div class="m-3">
                     <form method="POST" action="opmanager.php">
-                        <input type="hidden" name="operation" value="insert">
+                        <input type="hidden" name="operation" value="update">
                         <input type="hidden" name="table" value="<?php echo $_GET['table'] ?>">
                         <?php echo buildInsertFormForEdit();?>
-                        <input class="btn rounded-pill btn-mine" type="submit" value="Inserisci">
+                        <input class="btn rounded-pill btn-mine" type="submit" value="Modifica">
 
                     </form>
 
