@@ -117,7 +117,8 @@ CREATE TABLE Stanza (
 	Reparto CHAR(5) REFERENCES Reparto(Codice) ON UPDATE CASCADE,
 	Numero DECIMAL(3, 0),
 	NumeroLetti DECIMAL(2, 0),
-	PRIMARY KEY(Reparto, Numero)
+	PRIMARY KEY(Reparto, Numero),
+	CHECK (NumeroLetti IS NULL OR NumeroLetti >= 0)
 );
 
 CREATE TABLE ProntoSoccorso (

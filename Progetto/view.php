@@ -86,10 +86,14 @@ function loadTable()
     $tableName = $_GET['table'];
     $connection = connectToDatabase();
     $query = "SELECT * FROM {$tableName}";
-    $results = pg_fetch_all(executeQuery($connection, $query));
+    try {
+        $results = pg_fetch_all(executeQuery($connection, $query));
+    } catch (Exception $e) {
+        notifyError($e->getMessage());
+    }
     $columns = array_map(fn($el) => $el['column_name'], pg_fetch_all(getColumnsInformation($connection, $tableName)));
 
-    return buildTable($results, $columns);
+    return buildTable($results, $columns, $tableName);
 }
 
 

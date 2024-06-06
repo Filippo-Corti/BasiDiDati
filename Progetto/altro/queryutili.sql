@@ -61,3 +61,10 @@ CREATE TRIGGER check_numero_letti_trigger
 BEFORE INSERT ON Ricovero
 FOR EACH ROW
 EXECUTE FUNCTION check_numero_letti();
+
+
+-- Primary keys di una tabella
+SELECT column_name
+FROM information_schema.table_constraints TC JOIN information_schema.key_column_usage KCU
+ON TC.constraint_name = KCU.constraint_name
+WHERE TC.table_name = 'stanza' AND constraint_type = 'PRIMARY KEY'

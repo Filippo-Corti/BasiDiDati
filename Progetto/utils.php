@@ -28,21 +28,46 @@ function executeQuery($connection, $query, $params = NULL)
         $result = pg_query_params($connection, $query, $params);
     }
     if (!$result) {
-        echo "<br> Si è verificato un errore. <br>";
-        echo pg_last_error($connection);
-        exit();
+        throw new Exception(pg_last_error($connection));
     }
     return $result;
+}
+
+
+function notifyError($msg)
+{
+    echo "<br><b>ERRORE: {$msg}</b><br>";
+    exit();
 }
 
 function getColumnsInformation($connection, $tableName)
 {
     $query = "SELECT * FROM information_schema.columns WHERE table_name = $1 ORDER BY ordinal_position";
-    return executeQuery($connection, $query, array($tableName));
+    try {
+        return executeQuery($connection, $query, array($tableName));
+    } catch (Exception $e) {
+        notifyError($e->getMessage());
+    }
 }
 
+function getPrimaryKey($connection, $tableName)
+{
+    $query = <<<QRY
+    SELECT column_name
+    FROM information_schema.table_constraints TC JOIN information_schema.key_column_usage KCU
+    ON TC.constraint_name = KCU.constraint_name
+    WHERE TC.table_name = $1 AND constraint_type = 'PRIMARY KEY';
+    QRY;
+    try {
+        $results = executeQuery($connection, $query, array($tableName));
+        $pkeys = array_map(fn($el) => $el['column_name'], pg_fetch_all($results));
+    } catch (Exception $e) {
+        notifyError($e->getMessage());
+    }
+    return $pkeys;
+}
 
-function buildTable($results, $columns)
+function buildTable($results, $columns, $table)
 {
     //Intestation
     $str = '<table class="w-100">';
@@ -54,12 +79,13 @@ function buildTable($results, $columns)
     $str .= "<th> Actions </th>";
     $str .= '</tr>';
     foreach ($results as $row) {
-        $str .= '<tr>';
+        $str .= '<tr><form method="POST" action="opmanager.php">';
+        $str .= "<input type='hidden' name='table' value='{$table}'>"; //Table Name
         foreach ($columns as $col) {
-            $str .= "<td> {$row[$col]} </td>";
+            $str .= "<td> <input type='hidden' name='{$col}' value='{$row[$col]}'> {$row[$col]} </td>";
         }
-        $str .= "<td><button class='btn btn-edit'>Edit</button> <button class='btn btn-delete'>Delete</button> </td>";
-        $str .= '</tr>';
+        $str .= "<td><input type='submit' name='operation' value='Update' class='btn btn-edit'> <input type='submit' name='operation' value='Delete' class='btn btn-delete'></td>";
+        $str .= '</form></tr>';
     }
     return $str . '</table>';
 }
@@ -71,7 +97,7 @@ function buildInputText($name, $minsize, $maxsize, $required)
 
     return <<<EOD
         <label class="form-label" for="{$name}">{$name}:</label>
-        <input class="form-control rounded-pill" type="{$name}" name="text" id="{$name}" minlength="{$minsize}" maxlength="{$maxsize}" {$getRequired}>
+        <input class="form-control rounded-pill" type="text" name="{$name}" id="{$name}" minlength="{$minsize}" maxlength="{$maxsize}" {$getRequired}>
         <br>
     EOD;
 }

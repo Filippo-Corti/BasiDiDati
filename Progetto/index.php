@@ -42,9 +42,9 @@
             <div class="rounded-5 p-5 bg-white shadow-accent">
                 <div class="d-flex align-items-center justify-content-between gap-1">
                     <div class="pb-1 fw-semibold">
-                        <p class="my-0 py-0 text-green fw-semibold fs-6" style="transform:translateY(4px);">Inserimento
+                        <p class="my-0 py-0 text-green fw-semibold fs-6" style="transform:translateY(4px);">Home Page
                         </p>
-                        <h3 class="m-0 p-0 fw-bold">Paziente</h3>
+                        <h3 class="m-0 p-0 fw-bold">Home Page</h3>
                     </div>
                     <div>
                         <a class="d-flex flex-columns align-items-center justify-content-center" href="">
@@ -57,20 +57,6 @@
             </div>
         </div>
 
-        <?php 
-        
-        $a = 'abcd'; 
-        $b = password_hash($a, PASSWORD_DEFAULT); 
-
-        if (password_verify($a, $b)) {
-            echo "Passwords ok";
-            echo "<br>";
-            echo $b;
-        } else {
-            echo "Password not ok";
-        }
-
-        ?>
     </section>
 
 
