@@ -60,7 +60,7 @@
           <form method="POST" action="opmanager.php">
             <input type="hidden" name="operation" value="insert">
             <input type="hidden" name="table" value="<?php echo $_GET['table'] ?>">
-            <?php echo fillInsertForm(); ?>
+            <?php echo buildInsertForm(); ?>
 
             <input class="btn rounded-pill btn-mine" type="submit" value="Inserisci">
 
@@ -86,7 +86,7 @@
 <?php
 
 
-function fillInsertForm()
+function buildInsertForm()
 {
   include 'utils.php';
   $formFields = array();

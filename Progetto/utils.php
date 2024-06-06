@@ -7,6 +7,15 @@ function getRequired($r)
     return ($r) ? "required" : "";
 }
 
+function getEditable($e)
+{
+    return ($e) ? "" : "disabled";
+}
+
+function getValue($v) {
+    return ($v) ? "value='{$v}'" : "";
+}
+
 //Connection to Database
 function connectToDatabase()
 {
@@ -91,26 +100,30 @@ function buildTable($results, $columns, $table)
 }
 
 //Build Input
-function buildInputText($name, $minsize, $maxsize, $required)
+function buildInputText($name, $minsize, $maxsize, $required, $editable = true, $value = NULL)
 {
     $getRequired = getRequired($required);
+    $getEditable = getEditable($editable);
+    $valueStr = getValue($value);
 
     return <<<EOD
         <label class="form-label" for="{$name}">{$name}:</label>
-        <input class="form-control rounded-pill" type="text" name="{$name}" id="{$name}" minlength="{$minsize}" maxlength="{$maxsize}" {$getRequired}>
+        <input class="form-control rounded-pill" type="text" name="{$name}" id="{$name}" minlength="{$minsize}" maxlength="{$maxsize}" {$valueStr} {$getRequired} {$getEditable}>
         <br>
     EOD;
 }
 
-function buildInputNumber($name, $totalDigits, $decimalDigits, $required)
+function buildInputNumber($name, $totalDigits, $decimalDigits, $required, $editable = true, $value = NULL)
 {
     $getRequired = getRequired($required);
+    $getEditable = getEditable($editable);
+    $valueStr = getValue($value);
     $maxNumber = pow(10, $totalDigits - $decimalDigits) - 1;
     $decimalPrecision = 1 / pow(10, $decimalDigits);
 
     return <<<EOD
         <label class="form-label" for="{$name}">{$name}:</label>
-        <input class="form-control rounded-pill" name="{$name}" type="number" max="{$maxNumber}" step="{$decimalPrecision}" {$getRequired}>
+        <input class="form-control rounded-pill" name="{$name}" type="number" max="{$maxNumber}" step="{$decimalPrecision}" {$valueStr} {$getRequired} {$getEditable}>
         <br>
     EOD;
 }
@@ -124,52 +137,72 @@ function buildInputBoolean($name)
     EOD;
 }
 
-function buildInputDate($name, $required)
+function buildInputDate($name, $required, $editable = true, $value = NULL)
 {
     $getRequired = getRequired($required);
+    $getEditable = getEditable($editable);
+    $valueStr = getValue($value);
 
     return <<<EOD
         <label class="form-label" for="{$name}">{$name}:</label>
-        <input class="form-control rounded-pill" name="{$name}" type="date" {$getRequired}>
+        <input class="form-control rounded-pill" name="{$name}" type="date" {$valueStr} {$getRequired} {$getEditable}>
         <br>
     EOD;
 }
 
-function buildInputTime($name, $required)
+function buildInputTime($name, $required, $editable = true, $value = NULL)
 {
     $getRequired = getRequired($required);
+    $getEditable = getEditable($editable);
+    $valueStr = getValue($value);
 
     return <<<EOD
         <label class="form-label" for="{$name}">{$name}:</label>
-        <input class="form-control rounded-pill" name="{$name}" type="time" {$getRequired}>
+        <input class="form-control rounded-pill" name="{$name}" type="time" {$valueStr} {$getRequired} {$getEditable}>
         <br>
     EOD;
 }
 
-function buildInputDateTime($name, $required)
+function buildInputDateTime($name, $required, $editable = true, $value = NULL)
 {
     $getRequired = getRequired($required);
+    $getEditable = getEditable($editable);
+    $valueStr = getValue($value);
 
     return <<<EOD
         <label class="form-label" for="{$name}">{$name}:</label>
-        <input class="form-control rounded-pill" name="{$name}" type="datetime-local" {$getRequired}>
+        <input class="form-control rounded-pill" name="{$name}" type="datetime-local" {$valueStr} {$getRequired} {$getEditable}>
         <br>
     EOD;
 }
 
-function buildInputSelect($name, $options, $required)
+function buildInputSelect($name, $options, $required, $editable = true, $value = NULL)
 {
 
     $getRequired = getRequired($required);
+    $getEditable = getEditable($editable);
     $optionsStr = "";
+    $selected = false;
     foreach ($options as $option) {
-        $optionsStr .= "<option value='{$option}'>{$option}</option>";
+        if ($option == $value) {
+            echo "SELECTED";
+            $optionsStr .= "<option value='{$option}' selected>{$option}</option>";
+            $selected = true;
+        } else {
+            $optionsStr .= "<option value='{$option}' selected>{$option}</option>";
+        }
+    }
+
+    //NON VA
+    if (!$selected) {
+        $optionsStr = '<option value="" selected>--</option>' . $optionsStr;
+    } else {
+        $optionsStr = '<option value="">--</option>' . $optionsStr;
     }
 
     return <<<EOD
         <label class="form-label" for="{$name}">{$name}:</label>
-        <select class="form-select rounded-pill" name="{$name}" id="{$name}" {$getRequired}>
-        <option value="" selected>--</option>
+        <select class="form-select rounded-pill" name="{$name}" id="{$name}" {$getRequired} {$getEditable}>
         {$optionsStr}
         </select>
         <br>
