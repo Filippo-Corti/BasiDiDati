@@ -104,7 +104,7 @@ function loadTable()
     try {
         $results = pg_fetch_all(executeQuery($connection, $query));
     } catch (Exception $e) {
-        notifyError($e->getMessage());
+        memorizeError($e->getMessage());
     }
     $columns = array_map(fn ($el) => $el['column_name'], getColumnsInformation($connection, $table));
 

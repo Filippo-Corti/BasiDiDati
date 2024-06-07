@@ -1,9 +1,8 @@
 <?php
 
-function notifyError($msg)
+function memorizeError($msg)
 {
-    echo "<br><b>ERRORE: {$msg}</b><br>";
-    exit();
+    $_SESSION['error'] = $msg;
 }
 
 function getStandardInputFields($connection, &$columns, $disabledFields = NULL, $valuesForFields = NULL)
@@ -57,7 +56,7 @@ function getStandardInputField($connection, $column_data, $editable = true, $val
             try {
                 $result = executeQuery($connection, $query);
             } catch (Exception $e) {
-                notifyError($e->getMessage());
+                memorizeError($e->getMessage());
             }
             $enumValues = substr(pg_fetch_array($result)['enum_range'], 1, -1); //Trim { and }
             return buildInputSelect($name, explode(',', $enumValues), $column_data['is_nullable'] == 'NO', $editable, $value);
@@ -85,7 +84,7 @@ function getReferentialInputField($connection, &$columns, $foreignKeys, $referen
     try {
         $dataForSelectInput = executeQuery($connection, $query);
     } catch (Exception $e) {
-        notifyError($e->getMessage());
+        memorizeError($e->getMessage());
     }
     $dataForSelectInput = array_map(fn($el) => implode(', ', $el), pg_fetch_all($dataForSelectInput));
 

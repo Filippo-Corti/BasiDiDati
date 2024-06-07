@@ -54,7 +54,7 @@ function insertIntoDatabase($connection, $table, $attributes, $values)
     try {
         $results = executeQuery($connection, $query);
     } catch (Exception $e) {
-        notifyError($e->getMessage());
+        memorizeError($e->getMessage());
     }
 }
 
@@ -71,7 +71,7 @@ function deleteFromDatabase($connection, $table) {
     try {
         $results = executeQuery($connection, $query);
     } catch (Exception $e) {
-        notifyError($e->getMessage());
+        memorizeError($e->getMessage());
     }
 }
 
@@ -93,7 +93,7 @@ function updateIntoDatabase($connection, $table, $values) {
     try {
         $results = executeQuery($connection, $query);
     } catch (Exception $e) {
-        notifyError($e->getMessage());
+        memorizeError($e->getMessage());
     }
 }
 

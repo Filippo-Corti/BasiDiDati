@@ -6,7 +6,7 @@ function getColumnsInformation($connection, $tableName)
     try {
         return pg_fetch_all(executeQuery($connection, $query, array($tableName)));
     } catch (Exception $e) {
-        notifyError($e->getMessage());
+        memorizeError($e->getMessage());
     }
 }
 
@@ -22,7 +22,7 @@ function getPrimaryKeys($connection, $tableName)
         $results = executeQuery($connection, $query, array($tableName));
         $pkeys = array_map(fn($el) => $el['column_name'], pg_fetch_all($results));
     } catch (Exception $e) {
-        notifyError($e->getMessage());
+        memorizeError($e->getMessage());
     }
     return $pkeys;
 }
@@ -46,7 +46,7 @@ function getForeignKeyConstraints($connection, $tableName)
     try {
         $results = executeQuery($connection, $query, array($tableName));
     } catch (Exception $e) {
-        notifyError($e->getMessage());
+        memorizeError($e->getMessage());
     }
     return pg_fetch_all($results);
 }
