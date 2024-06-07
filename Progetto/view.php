@@ -81,7 +81,10 @@
 function loadTable()
 {
 
-    include 'utils.php';
+    foreach (glob("modules/*.php") as $filename) {
+		include $filename;	
+	}
+	
 
     $tableName = $_GET['table'];
     $connection = connectToDatabase();
@@ -91,7 +94,7 @@ function loadTable()
     } catch (Exception $e) {
         notifyError($e->getMessage());
     }
-    $columns = array_map(fn($el) => $el['column_name'], pg_fetch_all(getColumnsInformation($connection, $tableName)));
+    $columns = array_map(fn($el) => $el['column_name'], getColumnsInformation($connection, $tableName));
 
     return buildTable($results, $columns, $tableName);
 }

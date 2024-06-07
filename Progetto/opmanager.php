@@ -1,6 +1,9 @@
 <?php
+session_start();
 
-include 'utils.php';
+foreach (glob("modules/*.php") as $filename) {
+	include $filename;	
+}
 
 $operation = strtolower($_POST['operation']);
 $table = $_POST['table'];
@@ -11,16 +14,20 @@ $connection = connectToDatabase();
 
 switch ($operation) {
     case 'insert':
+		$attributes = array_filter($attributes, fn($el) => $el);
+		print_r($attributes);
         $names = implode(", ", array_keys($attributes));
-        $values = implode(", ", array_map(fn($el) => "'" . $el . "'", array_values($attributes)));
+        $values = implode(", ", array_map(fn($el) => "'" . $el . "'" , array_values($attributes)));
         insertIntoDatabase($connection, $table, $names, $values);
         header("Location: /basididati/progetto/index.php");
         exit();
-    case 'toupdate': //Redirect to Edit Page
-        header("Location: /basididati/progetto/edit.php");
+    case 'edit': //Redirect to Edit Page
+		$_SESSION['edit_data'] = $_POST;
+        header("Location: /basididati/progetto/edit.php?table={$table}");
         exit();
     case 'update': //Actually update the DB
-        updateIntoDatabase($connection, $table, $names, $values);
+        updateIntoDatabase($connection, $table, $attributes);
+		unset($_SESSION['edit_data']);
         header("Location: /basididati/progetto/index.php");
         exit();
     case 'delete':
@@ -33,6 +40,7 @@ switch ($operation) {
 function insertIntoDatabase($connection, $table, $attributes, $values)
 {
     $query = "INSERT INTO {$table} ({$attributes}) VALUES ({$values});";
+	print_r($query);
     try {
         $results = executeQuery($connection, $query);
     } catch (Exception $e) {
@@ -41,7 +49,7 @@ function insertIntoDatabase($connection, $table, $attributes, $values)
 }
 
 function deleteFromDatabase($connection, $table) {
-    $pkeys = getPrimaryKey($connection, $table);
+    $pkeys = getPrimaryKeys($connection, $table);
     $findCondition = "WHERE ";
     foreach($_POST as $k => $v) {
         if (in_array($k, $pkeys)) {
@@ -57,12 +65,12 @@ function deleteFromDatabase($connection, $table) {
     }
 }
 
-function updateIntoDatabase($connection, $table, $names, $values) {
-    $pkeys = getPrimaryKey($connection, $table);
+function updateIntoDatabase($connection, $table, $values) {
+    $pkeys = getPrimaryKeys($connection, $table);
     $findCondition = "WHERE ";
     $editCondition = "";
-    foreach($_POST as $k => $v) {
-        if (in_array($k, $pkeys)) {
+    foreach($values as $k => $v) {
+        if (in_array(strtolower($k), $pkeys)) {
             $findCondition .= "{$k} = '{$v}' AND ";
         } else {
             $editCondition .= "{$k} = '{$v}', ";
@@ -71,9 +79,12 @@ function updateIntoDatabase($connection, $table, $names, $values) {
     $findCondition = substr($findCondition, 0, -4);
     $editCondition = substr($editCondition, 0, -2);
     $query = "UPDATE {$table} SET {$editCondition} {$findCondition}";
-    echo "<br>";
-    echo $query;
-
+	echo $query;
+    try {
+        $results = executeQuery($connection, $query);
+    } catch (Exception $e) {
+        notifyError($e->getMessage());
+    }
 }
 
 //Adjusts Post array to get all and only attributes for the table

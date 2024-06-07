@@ -88,12 +88,14 @@
 
 function buildInsertForm()
 {
-  include 'utils.php';
+  foreach (glob("modules/*.php") as $filename) {
+		include $filename;	
+  }
   $formFields = array();
 
   $connection = connectToDatabase();
 
-  $columns = pg_fetch_all(getColumnsInformation($connection, $_GET['table']));
+  $columns = getColumnsInformation($connection, $_GET['table']);
   $foreignKeys = getForeignKeyConstraints($connection, $_GET['table']);
 
   $formFields += getReferentialInputFields($connection, $columns, $foreignKeys);
