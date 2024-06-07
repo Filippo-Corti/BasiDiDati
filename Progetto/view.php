@@ -1,7 +1,6 @@
 <?php
 session_start();
 
-print_r($_SESSION);
 
 if (isset($_GET['table'])) {
     echo "Dal GET";
@@ -14,9 +13,11 @@ if (isset($_GET['table'])) {
     $table = $_POST['table'];
     $_SESSION['table'] = $table;
     echo "Dal POST";
+} else { 
+    echo "DAL NIENTE";
 }
-echo "DAL NIENTE";
-
+echo "<br>";
+print_r($_SESSION);
 foreach (glob("modules/*.php") as $filename) {
     include $filename;
 }

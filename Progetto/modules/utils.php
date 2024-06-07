@@ -8,7 +8,7 @@ function memorizeError($operation, $msg)
     if (!isset($_SESSION['inbox'])) {
         $_SESSION['inbox'] = array();
     }
-    $_SESSION['inbox'][] = array('type' => NotificationType::Error, 'operation' => $operation,'message' => $msg);
+    $_SESSION['inbox'][] = array('type' => NotificationType::Error->value, 'operation' => $operation,'message' => $msg);
 }
 
 function notifyNewMessages() {
@@ -19,9 +19,9 @@ function notifyNewMessages() {
     $str = "";
     $i = 0;
     foreach($_SESSION['inbox'] as $msg) {
-        $str .= buildToast($i++, $msg['type'], $msg['operation'], $msg['message']);
+        $str .= buildToast($i++, NotificationType::from($msg['type']), $msg['operation'], $msg['message']);
     }
-    
+
     unset($_SESSION['inbox']);
     return $str;
 }

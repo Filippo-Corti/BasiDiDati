@@ -1,18 +1,23 @@
 <?php
 session_start();
 
+if (isset($_SESSION['table']) && $_SESSION['table'] != "") {
+    echo "Dal SESSION";
+    $table = $_SESSION['table'];
+} else if (isset($_POST['table'])){
+    $table = $_POST['table'];
+    $_SESSION['table'] = $table;
+    echo "Dal POST";
+} else { 
+    echo "DAL NIENTE";
+}
+echo "<br>";
+print_r($_SESSION);
 foreach (glob("modules/*.php") as $filename) {
 	include $filename;
 }
 
 $operation = strtolower($_POST['operation']);
-if (isset($_POST['table'])) {
-    $table = $_POST['table'];
-    $_SESSION['table'] = $table;
-} else {
-    $table = $_SESSION['table'];
-}
-
 
 $attributes = parsePostValues();
 
@@ -51,6 +56,7 @@ function insertIntoDatabase($connection, $table, $attributes, $values)
         $results = executeQuery($connection, $query);
     } catch (Exception $e) {
         memorizeError("Inserimento in {$table}", $e->getMessage());
+        return;
     }
 }
 
@@ -68,6 +74,7 @@ function deleteFromDatabase($connection, $table) {
         $results = executeQuery($connection, $query);
     } catch (Exception $e) {
         memorizeError("Cancellazione da {$table}", $e->getMessage());
+        return;
     }
 }
 
@@ -90,6 +97,7 @@ function updateIntoDatabase($connection, $table, $values) {
         $results = executeQuery($connection, $query);
     } catch (Exception $e) {
         memorizeError("Aggiornamento di {$table}", $e->getMessage());
+        return;
     }
 }
 
