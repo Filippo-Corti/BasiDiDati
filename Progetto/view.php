@@ -1,3 +1,19 @@
+<?php
+session_start();
+
+
+if (isset($_POST['table'])) {
+    $table = $_POST['table'];
+    $_SESSION['table'] = $table;
+} else if (isset($_SESSION['table']) && $_SESSION['table'] != ""){
+    $table = $_SESSION['table'];
+} else {
+    $table = $_GET['table'];
+    $_SESSION['table'] = $table;
+}
+
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -8,8 +24,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <link rel="icon" href="img/logo.svg">
     <link rel="stylesheet" href="css/style.css">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
 </head>
 
 <body>
@@ -18,8 +33,7 @@
         <div class="d-flex align-items-end gap-1">
             <div class="">
                 <svg xmlns="http://www.w3.org/2000/svg" width="45" height="45" viewBox="0 0 200 200">
-                    <polygon points="100,20 170,60 170,140 100,180 30,140 30,60" stroke="black" fill="transparent"
-                        stroke-width="16" stroke-linejoin="round" />
+                    <polygon points="100,20 170,60 170,140 100,180 30,140 30,60" stroke="black" fill="transparent" stroke-width="16" stroke-linejoin="round" />
                     <circle cx="100" cy="100" r="25" stroke="black" fill="transparent" stroke-width="16" />
                 </svg>
             </div>
@@ -46,14 +60,16 @@
                             Visualizzazione
                         </p>
                         <h3 class="m-0 p-0 fw-bold">
-                            <?php echo ucfirst($_GET['table']) ?>
+                            <?php echo ucfirst($table); ?>
                         </h3>
                     </div>
                     <div>
                         <a class="d-flex flex-columns align-items-center justify-content-center" href="">
-                            <button class="btn rounded-pill btn-mine ">
-                                <span class="poppins fw-normal"> &gt;</span> Inserisci nella Tabella
-                            </button>
+                            <form method="POST" action="insert.php">
+                                <button class="btn rounded-pill btn-mine" type="submit">
+                                    <span class="poppins fw-normal"> &gt;</span> Inserisci nella Tabella
+                                </button>
+                            </form>
                         </a>
                     </div>
                 </div>
@@ -66,12 +82,8 @@
     </section>
 
 
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
-        integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r"
-        crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"
-        integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy"
-        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous"></script>
 </body>
 
 </html>
@@ -81,22 +93,22 @@
 function loadTable()
 {
 
-    foreach (glob("modules/*.php") as $filename) {
-		include $filename;	
-	}
-	
+    global $table;
 
-    $tableName = $_GET['table'];
+    foreach (glob("modules/*.php") as $filename) {
+        include $filename;
+    }
+
     $connection = connectToDatabase();
-    $query = "SELECT * FROM {$tableName}";
+    $query = "SELECT * FROM {$table}";
     try {
         $results = pg_fetch_all(executeQuery($connection, $query));
     } catch (Exception $e) {
         notifyError($e->getMessage());
     }
-    $columns = array_map(fn($el) => $el['column_name'], getColumnsInformation($connection, $tableName));
+    $columns = array_map(fn ($el) => $el['column_name'], getColumnsInformation($connection, $table));
 
-    return buildTable($results, $columns, $tableName);
+    return buildTable($results, $columns, $table);
 }
 
 

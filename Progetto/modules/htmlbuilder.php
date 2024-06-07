@@ -13,7 +13,6 @@ function buildTable($results, $columns, $table)
     $str .= '</tr>';
     foreach ($results as $row) {
         $str .= '<tr><form method="POST" action="opmanager.php">';
-        $str .= "<input type='hidden' name='table' value='{$table}'>"; //Table Name
         foreach ($columns as $col) {
             $str .= "<td> <input type='hidden' name='{$col}' value='{$row[$col]}'> {$row[$col]} </td>";
         }
@@ -103,9 +102,11 @@ function buildInputDateTime($name, $required, $editable = true, $value = NULL)
 function buildInputSelect($name, $options, $required, $editable = true, $value = NULL)
 {
     $getRequired = getRequired($required);
-    if ($editable) {
-        $getEditable = "";
-        $getAlternativeInput = "<input type="
+    $getEditable = "";
+    $getAlternativeInput = "";
+    if (!$editable) {
+        $getEditable = "disabled";
+        $getAlternativeInput = "<input type='hidden' name='{$name}' value='{$value}'>";
     }
 
     $optionsStr = "";
@@ -127,7 +128,8 @@ function buildInputSelect($name, $options, $required, $editable = true, $value =
 
     return <<<EOD
         <label class="form-label" for="{$name}">{$name}:</label>
-        <select class="form-select rounded-pill" name="{$name}" id="{$name}" {$getRequired} >
+        {$getAlternativeInput}
+        <select class="form-select rounded-pill" name="{$name}" id="{$name}" {$getRequired} {$getEditable}>
         {$optionsStr}
         </select>
         <br>

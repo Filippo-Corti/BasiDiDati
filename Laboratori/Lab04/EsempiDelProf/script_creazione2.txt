@@ -1,0 +1,8 @@
+CREATE TABLE Utente 
+(
+username varchar(20) PRIMARY KEY, 
+pwd varchar(20) 
+);
+
+INSERT INTO Utente(username, pwd) VALUES ('Paolo', 'abc123');
+INSERT INTO Utente(username, pwd) VALUES ('Elena', '123abc');

@@ -1,3 +1,13 @@
+<?php
+session_start();
+
+if (isset($_POST['table'])) {
+  $table = $_POST['table'];
+  $_SESSION['table'] = $table;
+} else {
+  $table = $_SESSION['table'];
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -8,8 +18,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <link rel="icon" href="img/logo.svg">
   <link rel="stylesheet" href="css/style.css">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
-    integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
 </head>
 
 <body>
@@ -18,8 +27,7 @@
     <div class="d-flex align-items-end gap-1">
       <div class="">
         <svg xmlns="http://www.w3.org/2000/svg" width="45" height="45" viewBox="0 0 200 200">
-          <polygon points="100,20 170,60 170,140 100,180 30,140 30,60" stroke="black" fill="transparent"
-            stroke-width="16" stroke-linejoin="round" />
+          <polygon points="100,20 170,60 170,140 100,180 30,140 30,60" stroke="black" fill="transparent" stroke-width="16" stroke-linejoin="round" />
           <circle cx="100" cy="100" r="25" stroke="black" fill="transparent" stroke-width="16" />
         </svg>
       </div>
@@ -45,21 +53,20 @@
             <p class="my-0 py-0 text-green fw-semibold fs-6" style="transform:translateY(4px);">Inserimento
             </p>
             <h3 class="m-0 p-0 fw-bold">
-              <?php echo ucfirst($_GET['table']) ?>
+              <?php echo ucfirst($table) ?>
             </h3>
           </div>
           <div>
-            <a class="d-flex flex-columns align-items-center justify-content-center" href="">
-              <button class="btn rounded-pill btn-mine ">
-                <span class="poppins fw-normal"> &gt;</span> Visualizza la Tabella
+            <form method="POST" action="view.php">
+              <button class="btn rounded-pill btn-mine" type="submit">
+                <span class="poppins fw-normal"> &lt;</span> Visualizza la Tabella
               </button>
-            </a>
+            </form>
           </div>
         </div>
         <div class="m-3">
           <form method="POST" action="opmanager.php">
             <input type="hidden" name="operation" value="insert">
-            <input type="hidden" name="table" value="<?php echo $_GET['table'] ?>">
             <?php echo buildInsertForm(); ?>
 
             <input class="btn rounded-pill btn-mine" type="submit" value="Inserisci">
@@ -73,12 +80,8 @@
   </section>
 
 
-  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
-    integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r"
-    crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"
-    integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy"
-    crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous"></script>
 </body>
 
 </html>
@@ -88,15 +91,18 @@
 
 function buildInsertForm()
 {
+
+  global $table;
+
   foreach (glob("modules/*.php") as $filename) {
-		include $filename;	
+    include $filename;
   }
   $formFields = array();
 
   $connection = connectToDatabase();
 
-  $columns = getColumnsInformation($connection, $_GET['table']);
-  $foreignKeys = getForeignKeyConstraints($connection, $_GET['table']);
+  $columns = getColumnsInformation($connection, $table);
+  $foreignKeys = getForeignKeyConstraints($connection, $table);
 
   $formFields += getReferentialInputFields($connection, $columns, $foreignKeys);
   $formFields += getStandardInputFields($connection, $columns);

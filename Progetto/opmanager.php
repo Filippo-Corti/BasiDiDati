@@ -6,7 +6,17 @@ foreach (glob("modules/*.php") as $filename) {
 }
 
 $operation = strtolower($_POST['operation']);
-$table = $_POST['table'];
+if (isset($_POST['table'])) {
+    $table = $_POST['table'];
+    $_SESSION['table'] = $table;
+    echo "Dal POST";
+} else {
+    $table = $_SESSION['table'];
+    echo "Dalla session";
+        
+}
+
+echo "Table: {$table} <br>";
 
 $attributes = parsePostValues();
 
@@ -15,24 +25,24 @@ $connection = connectToDatabase();
 switch ($operation) {
     case 'insert':
 		$attributes = array_filter($attributes, fn($el) => $el);
-		print_r($attributes);
+		echo $table;
         $names = implode(", ", array_keys($attributes));
         $values = implode(", ", array_map(fn($el) => "'" . $el . "'" , array_values($attributes)));
         insertIntoDatabase($connection, $table, $names, $values);
-        header("Location: /basididati/progetto/view.php?table={$table}");
+        header("Location: {$DEFAULT_DIR}/view.php");
         exit();
     case 'edit': //Redirect to Edit Page
 		$_SESSION['edit_data'] = $_POST;
-        header("Location: /basididati/progetto/edit.php?table={$table}");
+        header("Location: {$DEFAULT_DIR}/edit.php");
         exit();
     case 'update': //Actually update the DB
         updateIntoDatabase($connection, $table, $attributes);
 		unset($_SESSION['edit_data']);
-        header("Location: /basididati/progetto/view.php?table={$table}");
+        header("Location: {$DEFAULT_DIR}/view.php");
         exit();
     case 'delete':
         deleteFromDatabase($connection, $table);
-        header("Location: /basididati/progetto/view.php?table={$table}");
+        header("Location: {$DEFAULT_DIR}/view.php");
         exit();
 
 }
@@ -66,15 +76,15 @@ function deleteFromDatabase($connection, $table) {
 }
 
 function updateIntoDatabase($connection, $table, $values) {
+    print_r($values);
     $pkeys = getPrimaryKeys($connection, $table);
     $findCondition = "WHERE ";
     $editCondition = "";
     foreach($values as $k => $v) {
         if (in_array(strtolower($k), $pkeys)) {
             $findCondition .= "{$k} = '{$v}' AND ";
-        } else {
-            $editCondition .= "{$k} = '{$v}', ";
         }
+        $editCondition .= "{$k} = '{$v}', ";
     }
     $findCondition = substr($findCondition, 0, -4);
     $editCondition = substr($editCondition, 0, -2);
