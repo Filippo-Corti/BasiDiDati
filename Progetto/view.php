@@ -1,15 +1,24 @@
 <?php
 session_start();
 
+print_r($_SESSION);
 
-if (isset($_POST['table'])) {
-    $table = $_POST['table'];
-    $_SESSION['table'] = $table;
-} else if (isset($_SESSION['table']) && $_SESSION['table'] != ""){
-    $table = $_SESSION['table'];
-} else {
+if (isset($_GET['table'])) {
+    echo "Dal GET";
     $table = $_GET['table'];
     $_SESSION['table'] = $table;
+} else if (isset($_SESSION['table']) && $_SESSION['table'] != "") {
+    echo "Dal SESSION";
+    $table = $_SESSION['table'];
+} else if (isset($_POST['table'])){
+    $table = $_POST['table'];
+    $_SESSION['table'] = $table;
+    echo "Dal POST";
+}
+echo "DAL NIENTE";
+
+foreach (glob("modules/*.php") as $filename) {
+    include $filename;
 }
 
 ?>
@@ -82,6 +91,16 @@ if (isset($_POST['table'])) {
     </section>
 
 
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+        <?php
+        notifyNewMessages();
+        ?>
+    </div>
+    <script src="js/activateToast.js" defer></script>
+
+
+
+
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous"></script>
 </body>
@@ -95,16 +114,13 @@ function loadTable()
 
     global $table;
 
-    foreach (glob("modules/*.php") as $filename) {
-        include $filename;
-    }
-
     $connection = connectToDatabase();
     $query = "SELECT * FROM {$table}";
     try {
         $results = pg_fetch_all(executeQuery($connection, $query));
     } catch (Exception $e) {
-        memorizeError($e->getMessage());
+        memorizeError("Lettura dal Database", $e->getMessage());
+        header("Refresh:0");
     }
     $columns = array_map(fn ($el) => $el['column_name'], getColumnsInformation($connection, $table));
 

@@ -26,6 +26,8 @@ function buildTable($results, $columns, $table)
 function buildToast($id, $type, $title, $content)
 {
 
+    
+
     switch ($type) {
         case NotificationType::Success:
             $bgClass = 'success';
@@ -38,7 +40,6 @@ function buildToast($id, $type, $title, $content)
         default:
             return;
     }
-
 
     return <<<EOD
     <div id="{$id}" class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-bs-config='{"delay":5000}'>

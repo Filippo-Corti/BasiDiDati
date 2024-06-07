@@ -3,12 +3,12 @@
 function memorizeError($operation, $msg)
 {
 
-    include 'vars.php';
+    include_once('vars.php');
 
     if (!isset($_SESSION['inbox'])) {
         $_SESSION['inbox'] = array();
     }
-    $_SESSION['inbox'][] = array('type' => NotificationType::Error, 'operation' => $operation, 'message' => $msg);
+    $_SESSION['inbox'][] = array('type' => NotificationType::Error, 'operation' => $operation,'message' => $msg);
 }
 
 function notifyNewMessages() {
@@ -17,10 +17,13 @@ function notifyNewMessages() {
     }
 
     $str = "";
+    $i = 0;
     foreach($_SESSION['inbox'] as $msg) {
-        $str .= 
+        $str .= buildToast($i++, $msg['type'], $msg['operation'], $msg['message']);
     }
-
+    
+    unset($_SESSION['inbox']);
+    return $str;
 }
 
 function getStandardInputFields($connection, &$columns, $disabledFields = NULL, $valuesForFields = NULL)
@@ -74,7 +77,8 @@ function getStandardInputField($connection, $column_data, $editable = true, $val
             try {
                 $result = executeQuery($connection, $query);
             } catch (Exception $e) {
-                memorizeError($e->getMessage());
+                memorizeError("Lettura dal Database", $e->getMessage());
+                header("Refresh:0");
             }
             $enumValues = substr(pg_fetch_array($result)['enum_range'], 1, -1); //Trim { and }
             return buildInputSelect($name, explode(',', $enumValues), $column_data['is_nullable'] == 'NO', $editable, $value);
@@ -102,7 +106,8 @@ function getReferentialInputField($connection, &$columns, $foreignKeys, $referen
     try {
         $dataForSelectInput = executeQuery($connection, $query);
     } catch (Exception $e) {
-        memorizeError($e->getMessage());
+        memorizeError("Lettura dal Database", $e->getMessage());
+        header("Refresh:0");
     }
     $dataForSelectInput = array_map(fn($el) => implode(', ', $el), pg_fetch_all($dataForSelectInput));
 

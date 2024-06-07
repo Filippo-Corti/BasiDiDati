@@ -1,12 +1,11 @@
 <?php
-error_reporting(E_ERROR); //Hides Warnings
+//error_reporting(E_ERROR); //Hides Warnings
 
 //Connection to Database
 function connectToDatabase()
 {
-
-    include 'vars.php';
-
+    include 'vars.php'; 
+    
     $connection = pg_connect($CONNECTION_STRING);
     if (!$connection) {
         echo '<br> Connessione al database fallita. <br>';

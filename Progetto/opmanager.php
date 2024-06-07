@@ -2,30 +2,26 @@
 session_start();
 
 foreach (glob("modules/*.php") as $filename) {
-	include $filename;	
+	include $filename;
 }
 
 $operation = strtolower($_POST['operation']);
 if (isset($_POST['table'])) {
     $table = $_POST['table'];
     $_SESSION['table'] = $table;
-    echo "Dal POST";
 } else {
     $table = $_SESSION['table'];
-    echo "Dalla session";
-        
 }
 
-echo "Table: {$table} <br>";
 
 $attributes = parsePostValues();
 
 $connection = connectToDatabase();
 
+
 switch ($operation) {
     case 'insert':
 		$attributes = array_filter($attributes, fn($el) => $el);
-		echo $table;
         $names = implode(", ", array_keys($attributes));
         $values = implode(", ", array_map(fn($el) => "'" . $el . "'" , array_values($attributes)));
         insertIntoDatabase($connection, $table, $names, $values);
@@ -54,7 +50,7 @@ function insertIntoDatabase($connection, $table, $attributes, $values)
     try {
         $results = executeQuery($connection, $query);
     } catch (Exception $e) {
-        memorizeError($e->getMessage());
+        memorizeError("Inserimento in {$table}", $e->getMessage());
     }
 }
 
@@ -71,7 +67,7 @@ function deleteFromDatabase($connection, $table) {
     try {
         $results = executeQuery($connection, $query);
     } catch (Exception $e) {
-        memorizeError($e->getMessage());
+        memorizeError("Cancellazione da {$table}", $e->getMessage());
     }
 }
 
@@ -93,7 +89,7 @@ function updateIntoDatabase($connection, $table, $values) {
     try {
         $results = executeQuery($connection, $query);
     } catch (Exception $e) {
-        memorizeError($e->getMessage());
+        memorizeError("Aggiornamento di {$table}", $e->getMessage());
     }
 }
 
