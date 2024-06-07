@@ -40,7 +40,7 @@ function buildToast($id, $type, $title, $content)
     }
 
     return <<<EOD
-    <div id="{$id}" class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-bs-config='{"delay":10000}'>
+    <div id="{$id}" class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-bs-config='{"delay":20000}'>
                 <div class="toast-header">
                     <div class="rounded me-2 d-flex justify-content-center p-1 bg-{$bgClass}">
                         <img src="img/{$icon}">

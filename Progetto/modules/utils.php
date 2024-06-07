@@ -8,26 +8,28 @@ function memorizeError($operation, $msg)
     if (!isset($_SESSION['inbox'])) {
         $_SESSION['inbox'] = array();
     }
-    $_SESSION['inbox'][] = array('type' => NotificationType::Error->value, 'operation' => $operation,'message' => $msg);
+    $_SESSION['inbox'][] = array('type' => NotificationType::Error->value, 'operation' => $operation, 'message' => $msg);
 }
 
-function memorizeSuccess($operation, $msg) {
+function memorizeSuccess($operation, $msg)
+{
     include_once('vars.php');
 
     if (!isset($_SESSION['inbox'])) {
         $_SESSION['inbox'] = array();
     }
-    $_SESSION['inbox'][] = array('type' => NotificationType::Success->value, 'operation' => $operation,'message' => $msg);
+    $_SESSION['inbox'][] = array('type' => NotificationType::Success->value, 'operation' => $operation, 'message' => $msg);
 }
 
-function notifyNewMessages() {
+function notifyNewMessages()
+{
     if (!isset($_SESSION['inbox'])) {
         return;
     }
 
     $str = "";
     $i = 0;
-    foreach($_SESSION['inbox'] as $msg) {
+    foreach ($_SESSION['inbox'] as $msg) {
         $str .= buildToast($i++, NotificationType::from($msg['type']), $msg['operation'], $msg['message']);
     }
 
@@ -39,8 +41,8 @@ function getStandardInputFields($connection, &$columns, $disabledFields = NULL, 
 {
     $formFields = array();
     foreach ($columns as $col) {
-		$toedit = ($disabledFields) ? !in_array($col['column_name'], $disabledFields) : true;
-		$value = ($valuesForFields && array_key_exists($col['column_name'], $valuesForFields)) ? $valuesForFields[$col['column_name']] : NULL;
+        $toedit = ($disabledFields) ? !in_array($col['column_name'], $disabledFields) : true;
+        $value = ($valuesForFields && array_key_exists($col['column_name'], $valuesForFields)) ? $valuesForFields[$col['column_name']] : NULL;
         $formFields[$col['ordinal_position']] = getStandardInputField($connection, $col, $toedit, $value);
     }
     return $formFields;
@@ -56,7 +58,7 @@ function getReferentialInputFields($connection, &$columns, $foreignKeys, $disabl
         }
     }
     foreach ($referencedTables as $referencedTable) {
-		$toedit = ($disabledFields) ? !in_array($referencedTable['column_name'], $disabledFields) : true;
+        $toedit = ($disabledFields) ? !in_array($referencedTable['column_name'], $disabledFields) : true;
         $formField = getReferentialInputField($connection, $columns, $foreignKeys, $referencedTable, $index, $toedit, $valuesForFields);
         $formFields[$index] = $formField;
     }
@@ -105,9 +107,9 @@ function getReferentialInputField($connection, &$columns, $foreignKeys, $referen
             $referencedData[] = $fk;
         }
     }
-    $referencedColumns = array_map(fn($el) => $el['referredcolumn'], $referencedData);
+    $referencedColumns = array_map(fn ($el) => $el['referredcolumn'], $referencedData);
     $referencedColumnsString = implode(", ", $referencedColumns);
-    $referringColumns = array_map(fn($el) => ucfirst($el['column_name']), $referencedData);
+    $referringColumns = array_map(fn ($el) => ucfirst($el['column_name']), $referencedData);
     $referringColumnsString = implode(", ", $referringColumns);
 
     //Execute Query to get Selection Data 
@@ -118,20 +120,20 @@ function getReferentialInputField($connection, &$columns, $foreignKeys, $referen
         memorizeError("Lettura dal Database", $e->getMessage());
         header("Refresh:0");
     }
-    $dataForSelectInput = array_map(fn($el) => implode(', ', $el), pg_fetch_all($dataForSelectInput));
+    $dataForSelectInput = array_map(fn ($el) => implode(', ', $el), pg_fetch_all($dataForSelectInput));
 
     //Find Correct Index in the Page 
-    $positionInPage = array_filter($columns, fn($el) => in_array(ucfirst($el['column_name']), $referringColumns));
-    $index = max(array_map(fn($el) => $el['ordinal_position'], $positionInPage));
-    $isRequired = in_array("NO", array_map(fn($el) => ucfirst($el['is_nullable']), array_filter($columns, fn($el) => in_array(ucfirst($el['column_name']), $referringColumns))));
+    $positionInPage = array_filter($columns, fn ($el) => in_array(ucfirst($el['column_name']), $referringColumns));
+    $index = max(array_map(fn ($el) => $el['ordinal_position'], $positionInPage));
+    $isRequired = in_array("NO", array_map(fn ($el) => ucfirst($el['is_nullable']), array_filter($columns, fn ($el) => in_array(ucfirst($el['column_name']), $referringColumns))));
 
     //Remove Referred Columns so that they don't get evaluated again
-    $columns = array_filter($columns, fn($el) => !in_array(ucfirst($el['column_name']), $referringColumns));
-    
-	$values = array_map(function($el) use ($valuesForFields) { 
-		return ($valuesForFields && array_key_exists(strtolower($el), $valuesForFields)) ? $valuesForFields[strtolower($el)] : NULL;
-	}, $referringColumns);
-	$value = implode(', ', $values); 
+    $columns = array_filter($columns, fn ($el) => !in_array(ucfirst($el['column_name']), $referringColumns));
+
+    $values = array_map(function ($el) use ($valuesForFields) {
+        return ($valuesForFields && array_key_exists(strtolower($el), $valuesForFields)) ? $valuesForFields[strtolower($el)] : NULL;
+    }, $referringColumns);
+    $value = implode(', ', $values);
 
 
     return buildInputSelect($referringColumnsString, $dataForSelectInput, $isRequired, $toedit, $value);

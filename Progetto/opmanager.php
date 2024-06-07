@@ -50,6 +50,8 @@ switch ($operation) {
 
 function insertIntoDatabase($connection, $table, $attributes, $values)
 {
+    global $DEFAULT_DIR;
+
     $query = "INSERT INTO {$table} ({$attributes}) VALUES ({$values});";
 	print_r($query);
     try {
@@ -57,7 +59,9 @@ function insertIntoDatabase($connection, $table, $attributes, $values)
         memorizeSuccess("Inserimento in {$table}", "Operazione avvenuta con successo.");
     } catch (Exception $e) {
         memorizeError("Inserimento in {$table}", $e->getMessage());
-        return;
+        $_SESSION['inserted_data'] = $_POST;
+        header("Location: {$DEFAULT_DIR}/insert.php");
+        exit();
     }
 }
 
