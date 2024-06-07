@@ -85,21 +85,6 @@
 
 <?php
 
-function disablePrimaryKey()
-{
-    foreach (glob("modules/*.php") as $filename) {
-		include $filename;	
-	}
-    $table = $_GET['table'];
-    $connection = connectToDatabase();
-
-    echo $table;
-
-    $pkeys = getPrimaryKeys($connection, $table);
-    print_r($pkeys);
-}
-
-
 function buildInsertFormForEdit()
 {
 	foreach (glob("modules/*.php") as $filename) {

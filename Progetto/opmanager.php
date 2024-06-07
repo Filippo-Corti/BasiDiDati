@@ -19,7 +19,7 @@ switch ($operation) {
         $names = implode(", ", array_keys($attributes));
         $values = implode(", ", array_map(fn($el) => "'" . $el . "'" , array_values($attributes)));
         insertIntoDatabase($connection, $table, $names, $values);
-        header("Location: /basididati/progetto/index.php");
+        header("Location: /basididati/progetto/view.php?table={$table}");
         exit();
     case 'edit': //Redirect to Edit Page
 		$_SESSION['edit_data'] = $_POST;
@@ -28,11 +28,11 @@ switch ($operation) {
     case 'update': //Actually update the DB
         updateIntoDatabase($connection, $table, $attributes);
 		unset($_SESSION['edit_data']);
-        header("Location: /basididati/progetto/index.php");
+        header("Location: /basididati/progetto/view.php?table={$table}");
         exit();
     case 'delete':
         deleteFromDatabase($connection, $table);
-        header("Location: /basididati/progetto/index.php");
+        header("Location: /basididati/progetto/view.php?table={$table}");
         exit();
 
 }

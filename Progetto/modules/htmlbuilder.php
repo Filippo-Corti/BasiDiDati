@@ -103,7 +103,11 @@ function buildInputDateTime($name, $required, $editable = true, $value = NULL)
 function buildInputSelect($name, $options, $required, $editable = true, $value = NULL)
 {
     $getRequired = getRequired($required);
-    $getEditable = getEditable($editable);
+    if ($editable) {
+        $getEditable = "";
+        $getAlternativeInput = "<input type="
+    }
+
     $optionsStr = "";
     $selected = false;
     foreach ($options as $option) {
@@ -123,7 +127,7 @@ function buildInputSelect($name, $options, $required, $editable = true, $value =
 
     return <<<EOD
         <label class="form-label" for="{$name}">{$name}:</label>
-        <select class="form-select rounded-pill" name="{$name}" id="{$name}" {$getRequired} {$getEditable}>
+        <select class="form-select rounded-pill" name="{$name}" id="{$name}" {$getRequired} >
         {$optionsStr}
         </select>
         <br>

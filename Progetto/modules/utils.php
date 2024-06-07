@@ -28,7 +28,6 @@ function getReferentialInputFields($connection, &$columns, $foreignKeys, $disabl
     }
     foreach ($referencedTables as $referencedTable) {
 		$toedit = ($disabledFields) ? !in_array($referencedTable['column_name'], $disabledFields) : true;
-		$value = ($valuesForFields && array_key_exists($referencedTable['column_name'], $valuesForFields)) ? $valuesForFields[$referencedTable['column_name']] : NULL;
         $formField = getReferentialInputField($connection, $columns, $foreignKeys, $referencedTable, $index, $toedit, $valuesForFields);
         $formFields[$index] = $formField;
     }
@@ -102,9 +101,7 @@ function getReferentialInputField($connection, &$columns, $foreignKeys, $referen
 		return ($valuesForFields && array_key_exists(strtolower($el), $valuesForFields)) ? $valuesForFields[strtolower($el)] : NULL;
 	}, $referringColumns);
 	$value = implode(', ', $values); 
-	
-    if ($toedit) {
-        return buildInputSelect($referringColumnsString, $dataForSelectInput, $isRequired, true, $value);
-    }
-    return buildInputSelect($referringColumnsString, $dataForSelectInput, $isRequired);
+
+
+    return buildInputSelect($referringColumnsString, $dataForSelectInput, $isRequired, $toedit, $value);
 }
