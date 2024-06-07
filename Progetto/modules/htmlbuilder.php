@@ -23,6 +23,40 @@ function buildTable($results, $columns, $table)
     return $str . '</table>';
 }
 
+function buildToast($id, $type, $title, $content)
+{
+
+    switch ($type) {
+        case NotificationType::Success:
+            $bgClass = 'success';
+            $icon = 'check.svg';
+            break;
+        case NotificationType::Error:
+            $bgClass = 'danger';
+            $icon = 'exclamation.svg';
+            break;
+        default:
+            return;
+    }
+
+
+    return <<<EOD
+    <div id="{$id}" class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-bs-config='{"delay":5000}'>
+                <div class="toast-header">
+                    <div class="rounded me-2 d-flex justify-content-center p-1 bg-{$bgClass}">
+                        <img src="img/{$icon}">
+                    </div>
+                    <strong class="me-auto">{$title}</strong>
+                    <small>Just Now</small>
+                    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+                <div class="toast-body">
+                    {$content}
+                </div>
+            </div>
+    EOD;
+}
+
 function buildInputText($name, $minsize, $maxsize, $required, $editable = true, $value = NULL)
 {
     $getRequired = getRequired($required);

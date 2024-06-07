@@ -1,8 +1,26 @@
 <?php
 
-function memorizeError($msg)
+function memorizeError($operation, $msg)
 {
-    $_SESSION['error'] = $msg;
+
+    include 'vars.php';
+
+    if (!isset($_SESSION['inbox'])) {
+        $_SESSION['inbox'] = array();
+    }
+    $_SESSION['inbox'][] = array('type' => NotificationType::Error, 'operation' => $operation, 'message' => $msg);
+}
+
+function notifyNewMessages() {
+    if (!isset($_SESSION['inbox'])) {
+        return;
+    }
+
+    $str = "";
+    foreach($_SESSION['inbox'] as $msg) {
+        $str .= 
+    }
+
 }
 
 function getStandardInputFields($connection, &$columns, $disabledFields = NULL, $valuesForFields = NULL)

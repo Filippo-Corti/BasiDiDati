@@ -7,7 +7,6 @@ function connectToDatabase()
 
     include 'vars.php';
 
-	
     $connection = pg_connect($CONNECTION_STRING);
     if (!$connection) {
         echo '<br> Connessione al database fallita. <br>';
