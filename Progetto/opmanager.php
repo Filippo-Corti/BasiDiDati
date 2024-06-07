@@ -54,6 +54,7 @@ function insertIntoDatabase($connection, $table, $attributes, $values)
 	print_r($query);
     try {
         $results = executeQuery($connection, $query);
+        memorizeSuccess("Inserimento in {$table}", "Operazione avvenuta con successo.");
     } catch (Exception $e) {
         memorizeError("Inserimento in {$table}", $e->getMessage());
         return;
@@ -72,6 +73,7 @@ function deleteFromDatabase($connection, $table) {
     $query = "DELETE FROM {$table} " . $findCondition;
     try {
         $results = executeQuery($connection, $query);
+        memorizeSuccess("Cancellazione da {$table}", "Operazione avvenuta con successo.");
     } catch (Exception $e) {
         memorizeError("Cancellazione da {$table}", $e->getMessage());
         return;
@@ -95,6 +97,7 @@ function updateIntoDatabase($connection, $table, $values) {
 	echo $query;
     try {
         $results = executeQuery($connection, $query);
+        memorizeSuccess("Aggiornamento di {$table}", "Operazione avvenuta con successo.");
     } catch (Exception $e) {
         memorizeError("Aggiornamento di {$table}", $e->getMessage());
         return;

@@ -11,6 +11,15 @@ function memorizeError($operation, $msg)
     $_SESSION['inbox'][] = array('type' => NotificationType::Error->value, 'operation' => $operation,'message' => $msg);
 }
 
+function memorizeSuccess($operation, $msg) {
+    include_once('vars.php');
+
+    if (!isset($_SESSION['inbox'])) {
+        $_SESSION['inbox'] = array();
+    }
+    $_SESSION['inbox'][] = array('type' => NotificationType::Success->value, 'operation' => $operation,'message' => $msg);
+}
+
 function notifyNewMessages() {
     if (!isset($_SESSION['inbox'])) {
         return;

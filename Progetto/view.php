@@ -3,21 +3,14 @@ session_start();
 
 
 if (isset($_GET['table'])) {
-    echo "Dal GET";
     $table = $_GET['table'];
     $_SESSION['table'] = $table;
 } else if (isset($_SESSION['table']) && $_SESSION['table'] != "") {
-    echo "Dal SESSION";
     $table = $_SESSION['table'];
 } else if (isset($_POST['table'])){
     $table = $_POST['table'];
     $_SESSION['table'] = $table;
-    echo "Dal POST";
-} else { 
-    echo "DAL NIENTE";
 }
-echo "<br>";
-print_r($_SESSION);
 foreach (glob("modules/*.php") as $filename) {
     include $filename;
 }
@@ -94,10 +87,10 @@ foreach (glob("modules/*.php") as $filename) {
 
     <div class="toast-container position-fixed bottom-0 end-0 p-3">
         <?php
-        notifyNewMessages();
+        echo notifyNewMessages();
         ?>
     </div>
-    <script src="js/activateToast.js" defer></script>
+    <script src="js/activateToasts.js" defer></script>
 
 
 

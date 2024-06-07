@@ -68,7 +68,7 @@ foreach (glob("modules/*.php") as $filename) {
 
     <div class="toast-container position-fixed bottom-0 end-0 p-3">
         <?php
-        notifyNewMessages();
+        echo notifyNewMessages();
         ?>
     </div>
     <script src="js/activateToast.js" defer></script>
