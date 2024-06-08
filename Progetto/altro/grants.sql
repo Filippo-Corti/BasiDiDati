@@ -1,11 +1,11 @@
-CREATE USER paziente WITH LOGIN PASSWORD 'dbpaziente';
-GRANT CONNECT ON DATABASE ospedali TO paziente;
-GRANT USAGE ON SCHEMA public TO paziente;
-GRANT SELECT ON TABLE public.Paziente TO paziente;
-GRANT SELECT ON TABLE public.Esame TO paziente;
-GRANT SELECT ON TABLE public.EsameSpecialistico TO paziente;
-GRANT SELECT ON TABLE public.Prenotazione TO paziente;
-GRANT SELECT ON TABLE public.Ricovero TO paziente;
+-- CREATE USER paziente WITH LOGIN PASSWORD 'dbpaziente';
+-- GRANT CONNECT ON DATABASE ospedali TO paziente;
+-- GRANT USAGE ON SCHEMA public TO paziente;
+-- GRANT SELECT ON TABLE public.Paziente TO paziente;
+-- GRANT SELECT ON TABLE public.Esame TO paziente;
+-- GRANT SELECT ON TABLE public.EsameSpecialistico TO paziente;
+-- GRANT SELECT ON TABLE public.Prenotazione TO paziente;
+-- GRANT SELECT ON TABLE public.Ricovero TO paziente;
 
 /*
 Il paziente può:

@@ -71,6 +71,12 @@ function getStandardInputField($connection, $column_data, $editable = true, $val
 {
     $name = ucfirst($column_data['column_name']);
     $field_type = $column_data['udt_name'];
+
+    if (stristr($name, "hashed")) {
+        $name = str_ireplace("hashed", "Plaintext", $name);
+        return buildInputPassword($name, 0, $column_data['character_maximum_length'], $column_data['is_nullable'] == 'NO', $editable, $value);
+    }
+
     switch ($field_type) {
         case 'bpchar':
             return buildInputText($name, $column_data['character_maximum_length'], $column_data['character_maximum_length'], $column_data['is_nullable'] == 'NO', $editable, $value);

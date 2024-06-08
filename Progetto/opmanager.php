@@ -2,19 +2,14 @@
 session_start();
 
 if (isset($_SESSION['table']) && $_SESSION['table'] != "") {
-    echo "Dal SESSION";
     $table = $_SESSION['table'];
-} else if (isset($_POST['table'])){
+} else if (isset($_POST['table'])) {
     $table = $_POST['table'];
     $_SESSION['table'] = $table;
-    echo "Dal POST";
-} else { 
-    echo "DAL NIENTE";
+} else {
 }
-echo "<br>";
-print_r($_SESSION);
 foreach (glob("modules/*.php") as $filename) {
-	include $filename;
+    include $filename;
 }
 
 $operation = strtolower($_POST['operation']);
@@ -26,26 +21,33 @@ $connection = connectToDatabase();
 
 switch ($operation) {
     case 'insert':
-		$attributes = array_filter($attributes, fn($el) => $el);
+        $attributes = array_filter($attributes, fn ($el) => $el);
         $names = implode(", ", array_keys($attributes));
-        $values = implode(", ", array_map(fn($el) => "'" . $el . "'" , array_values($attributes)));
+        $values = implode(", ", array_map(fn ($el) => "'" . $el . "'", array_values($attributes)));
         insertIntoDatabase($connection, $table, $names, $values);
         header("Location: {$DEFAULT_DIR}/view.php");
         exit();
     case 'edit': //Redirect to Edit Page
-		$_SESSION['edit_data'] = $_POST;
+        $_SESSION['edit_data'] = $_POST;
         header("Location: {$DEFAULT_DIR}/edit.php");
         exit();
     case 'update': //Actually update the DB
         updateIntoDatabase($connection, $table, $attributes);
-		unset($_SESSION['edit_data']);
+        unset($_SESSION['edit_data']);
         header("Location: {$DEFAULT_DIR}/view.php");
         exit();
     case 'delete':
         deleteFromDatabase($connection, $table);
         header("Location: {$DEFAULT_DIR}/view.php");
         exit();
-
+    case 'login_as_patient':
+        loginAsPatient($connection);
+        header("Location: {$DEFAULT_DIR}/index.php");
+        exit();
+    case 'login_as_worker':
+        loginAsWorker($connection);
+        header("Location: {$DEFAULT_DIR}/index.php");
+        exit();
 }
 
 function insertIntoDatabase($connection, $table, $attributes, $values)
@@ -53,7 +55,7 @@ function insertIntoDatabase($connection, $table, $attributes, $values)
     global $DEFAULT_DIR;
 
     $query = "INSERT INTO {$table} ({$attributes}) VALUES ({$values});";
-	print_r($query);
+    print_r($query);
     try {
         $results = executeQuery($connection, $query);
         memorizeSuccess("Inserimento in {$table}", "Operazione avvenuta con successo.");
@@ -65,10 +67,11 @@ function insertIntoDatabase($connection, $table, $attributes, $values)
     }
 }
 
-function deleteFromDatabase($connection, $table) {
+function deleteFromDatabase($connection, $table)
+{
     $pkeys = getPrimaryKeys($connection, $table);
     $findCondition = "WHERE ";
-    foreach($_POST as $k => $v) {
+    foreach ($_POST as $k => $v) {
         if (in_array($k, $pkeys)) {
             $findCondition .= "{$k} = '{$v}' AND ";
         }
@@ -84,12 +87,13 @@ function deleteFromDatabase($connection, $table) {
     }
 }
 
-function updateIntoDatabase($connection, $table, $values) {
+function updateIntoDatabase($connection, $table, $values)
+{
     print_r($values);
     $pkeys = getPrimaryKeys($connection, $table);
     $findCondition = "WHERE ";
     $editCondition = "";
-    foreach($values as $k => $v) {
+    foreach ($values as $k => $v) {
         if (!$v) continue; //Avoid statements like "Attribute = NULL"
         if (in_array(strtolower($k), $pkeys)) {
             $findCondition .= "{$k} = '{$v}' AND ";
@@ -99,13 +103,57 @@ function updateIntoDatabase($connection, $table, $values) {
     $findCondition = substr($findCondition, 0, -4);
     $editCondition = substr($editCondition, 0, -2);
     $query = "UPDATE {$table} SET {$editCondition} {$findCondition}";
-	echo $query;
+    echo $query;
     try {
         $results = executeQuery($connection, $query);
         memorizeSuccess("Aggiornamento di {$table}", "Operazione avvenuta con successo.");
     } catch (Exception $e) {
         memorizeError("Aggiornamento di {$table}", $e->getMessage());
         return;
+    }
+}
+
+function loginAsPatient($connection)
+{
+
+    global $DEFAULT_DIR;
+
+    $query = "SELECT * FROM UtenzaPaziente WHERE paziente = $1;";
+    try {
+        $result = pg_fetch_array(executeQuery($connection, $query, array($_POST['Username'])));
+        if (password_verify($_POST['Password'], $result['hashedpassword'])) {
+            memorizeSuccess("Login", "Operazione avvenuta con successo. Benvenuto {$_POST['Username']}.");
+        } else {
+            memorizeError("Login", "Credenziali non valide. Riprovare.");
+            header("Location: {$DEFAULT_DIR}/login.php");
+            exit();
+        }
+    } catch (Exception $e) {
+        memorizeError("Login", "Credenziali non valide. Riprovare.");
+        header("Location: {$DEFAULT_DIR}/login.php");
+        exit();
+    }
+}
+
+function loginAsWorker($connection)
+{
+
+    global $DEFAULT_DIR;
+
+    $query = "SELECT * FROM UtenzaPersonale WHERE paziente = $1;";
+    try {
+        $result = pg_fetch_array(executeQuery($connection, $query, array($_POST['Username'])));
+        if (password_verify($_POST['Password'], $result['hashedpassword'])) {
+            memorizeSuccess("Login", "Operazione avvenuta con successo. Benvenuto {$_POST['Username']}.");
+        } else {
+            memorizeError("Login", "Credenziali non valide. Riprovare.");
+            header("Location: {$DEFAULT_DIR}/login.php");
+            exit();
+        }
+    } catch (Exception $e) {
+        memorizeError("Login", "Credenziali non valide. Riprovare.");
+        header("Location: {$DEFAULT_DIR}/login.php");
+        exit();
     }
 }
 
@@ -127,10 +175,14 @@ function parsePostValues()
         $i = 0;
         foreach ($ks as $key) {
             $value = $vs[$i++];
+            if (stristr($key, "plaintext")) {
+                $key = str_ireplace("plaintext", "Hashed", $key);
+                $value = password_hash($value, PASSWORD_DEFAULT);
+            }
             $attributes[$key] = $value;
         }
     }
 
-    return $attributes;
 
+    return $attributes;
 }

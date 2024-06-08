@@ -30,17 +30,19 @@ function buildToast($id, $type, $title, $content)
         case NotificationType::Success:
             $bgClass = 'success';
             $icon = 'check.svg';
+            $appearenceTime = "5000";
             break;
         case NotificationType::Error:
             $bgClass = 'danger';
             $icon = 'exclamation.svg';
+            $appearenceTime = "20000";
             break;
         default:
             return;
     }
 
     return <<<EOD
-    <div id="{$id}" class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-bs-config='{"delay":20000}'>
+    <div id="{$id}" class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-bs-config='{"delay":{$appearenceTime}}'>
                 <div class="toast-header">
                     <div class="rounded me-2 d-flex justify-content-center p-1 bg-{$bgClass}">
                         <img src="img/{$icon}">
@@ -65,6 +67,19 @@ function buildInputText($name, $minsize, $maxsize, $required, $editable = true, 
     return <<<EOD
         <label class="form-label" for="{$name}">{$name}:</label>
         <input class="form-control rounded-pill" type="text" name="{$name}" id="{$name}" minlength="{$minsize}" maxlength="{$maxsize}" {$valueStr} {$getRequired} {$getEditable}>
+        <br>
+    EOD;
+}
+
+function buildInputPassword($name, $minsize, $maxsize, $required, $editable = true, $value = NULL)
+{
+    $getRequired = getRequired($required);
+    $getEditable = getEditable($editable);
+    $valueStr = getValue($value);
+
+    return <<<EOD
+        <label class="form-label" for="{$name}">{$name}:</label>
+        <input class="form-control rounded-pill" type="password" name="{$name}" id="{$name}" minlength="{$minsize}" maxlength="{$maxsize}" {$valueStr} {$getRequired} {$getEditable}>
         <br>
     EOD;
 }

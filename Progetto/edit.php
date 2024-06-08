@@ -12,6 +12,7 @@ foreach (glob("modules/*.php") as $filename) {
     include $filename;
 }
 
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -103,12 +104,23 @@ foreach (glob("modules/*.php") as $filename) {
 function buildInsertFormForEdit()
 {
 
-    global $table;
+    global $table, $DEFAULT_DIR;
 
     $connection = connectToDatabase();
     $formFields = array();
 
     $columns = getColumnsInformation($connection, $table);
+
+    //Edit is allowed only for tables that don't deal with passwords
+    $columnsNames = array_map(fn($el) => $el['column_name'], $columns);
+
+    if (stristr(implode(",", $columnsNames), "password")) {
+        memorizeError("Aggiornamento di {$table}", "Per ragioni di sicurezza non è possibile aggiornare questa tabella. Cancellare il record e reinserirlo.");
+        header("Location: {$DEFAULT_DIR}/view.php");
+        exit();
+    }
+
+
     $foreignKeys = getForeignKeyConstraints($connection, $table);
     $primaryKeys = getPrimaryKeys($connection, $table);
 
