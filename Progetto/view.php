@@ -1,27 +1,21 @@
 <?php
 session_start();
 
-$databaseTable = true;
-if (isset($_SESSION['query'])) {
-    $databaseTable = false;
-}
-
-if ($databaseTable) {
-    if (isset($_GET['table'])) {
-        $table = $_GET['table'];
-        $_SESSION['table'] = $table;
-    } else if (isset($_SESSION['table']) && $_SESSION['table'] != "") {
-        $table = $_SESSION['table'];
-    } else if (isset($_POST['table'])) {
-        $table = $_POST['table'];
-        $_SESSION['table'] = $table;
-    }
-} 
-
-
-
 foreach (glob("modules/*.php") as $filename) {
     include $filename;
+}
+ 
+if (isset($_SESSION['query'])) {
+    //Personalized Query
+    $title = $_SESSION['query_title'];
+    $query = $_SESSION['query'];
+    $actions = false;
+} else {
+    //Standard Database Table view
+    $table = getTable();
+    $title = ucfirst($table);
+    $query = "SELECT * FROM {$table}";
+    $actions = $_SESSION['logged_user']['type'] == 'worker';
 }
 
 ?>
@@ -73,20 +67,16 @@ foreach (glob("modules/*.php") as $filename) {
                         </p>
                         <h3 class="m-0 p-0 fw-bold">
                             <?php
-                            if ($databaseTable) {
-                                echo ucfirst($table);
-                            } else {
-                                echo $_SESSION['query_title'];
-                            }
+                            echo $title;
                             ?>
                         </h3>
                     </div>
                     <?php
-                    if (!isset($_SESSION['query'])) {
+                    if ($table && $actions) {
                         echo <<<EOD
                         <div>
                             <a class="d-flex flex-columns align-items-center justify-content-center" href="">
-                                <form method="POST" action="insert.php">
+                                <form method="POST" action="opmanager.php">
                                     <input type="hidden" name="operation" value="goto_insert">
                                     <input type="hidden" name="table" value="{$table}">
                                     <button class="btn rounded-pill btn-mine" type="submit">
@@ -99,7 +89,7 @@ foreach (glob("modules/*.php") as $filename) {
                     } ?>
                 </div>
                 <div class="d-flex justify-content-center mt-3">
-                    <?php echo loadTable(); ?>
+                   <?php echo showTable() ?>
                 </div>
             </div>
         </div>
@@ -125,33 +115,33 @@ foreach (glob("modules/*.php") as $filename) {
 
 <?php
 
-function loadTable()
-{
-
-    global $table;
-
+function showTable() {
+    global $query, $actions, $table;
     $connection = connectToDatabase();
-    $actions = false;
 
     try {
-        if (isset($_SESSION['query'])) {
-            $query = $_SESSION['query'];
-            $results = pg_fetch_all(executeQuery($connection, $query));
-            $columns = array_keys($results[0]);
-        } else {
-            $query = "SELECT * FROM {$table}";
-            $results = pg_fetch_all(executeQuery($connection, $query));
-            $columns = array_map(fn ($el) => $el['column_name'], getColumnsInformation($connection, $table));
-            $actions = true;
-        }
+        $results = executeQuery($connection, $query);
     } catch (Exception $e) {
         memorizeError("Lettura dal Database", $e->getMessage());
+        exit();
         header("Refresh:0");
     }
+    $columns = getColumnsByResults($results);
+    $resultData = pg_fetch_all($results);
 
-
-    return buildTable($results, $columns, $table, $actions);
+    return buildTable($resultData, $columns, $table, $actions);
 }
 
+function getTable()
+{
+    if (isset($_GET['table'])) {
+        return $_GET['table'];
+    } else {
+        if (isset($_SESSION['table'])) {
+            return $_SESSION['table'];
+        }
+    }
+    return null;
+}
 
 ?>

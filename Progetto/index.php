@@ -66,16 +66,7 @@ foreach (glob("modules/*.php") as $filename) {
 
         ?>
         </div>
-        <div class="timeline p-4 block mb-4">
-            <div class="tl-item">
-                <div class="tl-dot b-warning"></div>
-                <div class="tl-content">
-                    <div class="fw-semibold">Titolo</div>
-                    <div>Descrizione</div>
-                    <div class="tl-date text-muted mt-1">Data</div>
-                </div>
-            </div>
-        </div>
+
 
         </div>
     </section>
@@ -100,6 +91,20 @@ foreach (glob("modules/*.php") as $filename) {
 
 function loadPatientHomePage()
 {
+
+    global $loggedUser;
+
+    $connection = connectToDatabase();
+
+    $userData = getPatientInfo($connection, $loggedUser['username']);
+    $userAppointments = getPatientFutureAppointments($connection, $loggedUser['username']);
+    $latestHospitalization = getPatientLatestHospitalization($connection, $loggedUser['username']);
+    $diagnosis = getDiagnosis($connection, $latestHospitalization['codice']);
+
+
+    $userTimeline = buildAppointmentsTimeline($userAppointments);
+    $dataFine = $latestHospitalization['ospedale'] or "IN CORSO";
+
     echo <<<EOD
     <div class="my-5 mx-2">
         <div class="rounded-5 py-3 px-3 bg-white shadow-accent">
@@ -109,15 +114,14 @@ function loadPatientHomePage()
                         Home Page
                     </p>
                     <h3 class="m-0 p-0 fw-bold">
-                        Bentornato Filippo Corti
+                        Bentornato {$userData['nome']} {$userData['cognome']}
                     </h3>
                     <div class="mt-3 fs-5 ms-2">
-                        <p class="pb-1 m-0"> I tuoi dati:</p>
-                        <ul>
-                            <li> Codice Fiscale: CRTFPP03S07L319C </li>
-                            <li> Data di Nascita: 2003-11-07 (Età 20 anni) </li>
-                            <li> Indirizzo: (22075) Via XXV Aprile, 15 </li>
-                        </ul>
+                        <table class="ps-5">
+                            <tr> <th class="text-uppercase fw-semibold"> Codice Fiscale </th><td class="my-1"> {$userData['cf']} </td> </tr>
+                            <tr> <th class="text-uppercase fw-semibold"> Data di Nascita </th><td class="my-1"> {$userData['datanascita']} (Età {$userData['eta']} anni) </td> </tr>
+                            <tr> <th class="text-uppercase fw-semibold"> Indirizzo </th><td class="my-1"> {$userData['cap']} Via {$userData['via']}, {$userData['nciv']} </td> </tr>
+                        </table>
                     </div>
                 </div>
                 <div>
@@ -126,26 +130,61 @@ function loadPatientHomePage()
             </div>
         </div>
     </div>
+    <div>
+        <div class="d-flex align-items-center justify-content-center">
+            <form method="POST" action="opmanager.php">
+                <input type="hidden" name="operation" value="request_appointment">
+                <button class="btn rounded-pill btn-mine" type="submit">
+                    <span class="poppins fw-normal"> &gt;</span> Richiedi una Prenotazione
+                </button>
+            </form>
+        </div>
+        <p class="text-secondary text-center pt-3 mb-0"> Per prenotare per un Esame è necessario effettuare una Richiesta. <br>
+        Le richieste vengono elaborate il prima possibile dal nostro Personale. </p>
+    </div>
     <div class="row my-5">
         <div class="col-lg mx-2">
             <div class="rounded-5 py-5 px-3 bg-white shadow-accent">
-                <a class="d-flex flex-columns align-items-center justify-content-center" href="">
+                <h4 class="fw-bold ps-4">
+                    Il tuo ultimo Ricovero:
+                </h4>
+                <div class="row ps-4">
+                    <table class="ps-5">
+                        <tr> <th style="max-width:70px" class="text-uppercase fw-semibold"> Ospedale </th><td class="my-1"> {$latestHospitalization['ospedale']} </td> </tr>
+                        <tr> <th style="max-width:70px" class="text-uppercase fw-semibold"> Reparto </th><td class="my-1"> {$latestHospitalization['reparto']} </td> </tr>
+                        <tr> <th style="max-width:70px" class="text-uppercase fw-semibold"> Stanza </th><td class="my-1"> {$latestHospitalization['stanza']} </td> </tr>
+                        <tr> <th style="max-width:70px" class="text-uppercase fw-semibold"> Data di Accettazione </th><td class="my-1"> {$latestHospitalization['datainizio']} </td> </tr>
+                        <tr> <th style="max-width:70px" class="text-uppercase fw-semibold"> Data di Dimissione </th><td class="my-1"> {$dataFine} </td> </tr>
+                        <tr> <th style="max-width:70px" class="text-uppercase fw-semibold"> Diagnosi </th><td class="my-1">  {$diagnosis}  </td> </tr>
+                    </table>
+                </div>
+                <div class="mt-4 d-flex justify-content-end">
                     <form method="POST" action="opmanager.php">
-                        <input type="hidden" name="operation" value="view_appointments">
-                        <button class="btn rounded-pill btn-mine" type="submit">
-                            <span class="poppins fw-normal"> &gt;</span> Richiedi una Prenotazione
+                        <input type="hidden" name="operation" value="view_hospitalizations">
+                        <button class="btn rounded-pill btn-mine-light" type="submit">
+                            <span class="poppins fw-normal"> &gt;</span> Visualizza tutti i Ricoveri
                         </button>
                     </form>
-                </a>
+                </div>
             </div>
         </div>
         <div class="col-lg mx-2">
             <div class="rounded-5 py-5 px-3 bg-white shadow-accent">
+                <h4 class="m-0 p-0 fw-bold ps-4">
+                    Le tue Prenotazioni future:
+                </h4>
+                <div class="timeline p-3 block mb-4">
+                    {$userTimeline}
+                </div>
+                <div class="d-flex justify-content-end">
+                    <form method="POST" action="opmanager.php">
+                        <input type="hidden" name="operation" value="view_appointments">
+                        <button class="btn rounded-pill btn-mine-light" type="submit">
+                            <span class="poppins fw-normal"> &gt;</span> Visualizza tutte le Prenotazioni
+                        </button>
+                    </form>
+                </div>
             </div>
-        </div>
-    </div>
-    <div class="my-5 mx-2">
-        <div class="rounded-5 py-5 px-3 bg-white shadow-accent">
         </div>
     </div>
     EOD;

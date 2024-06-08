@@ -20,6 +20,7 @@ CREATE TABLE Paziente (
 	CAP VARCHAR(5) NOT NULL,
 	Via VARCHAR(30) NOT NULL,
 	nCiv DECIMAL(3, 0) NOT NULL,
+	UNIQUE(NumeroTessera),
 	CHECK (nCiv > 0)
 );
 
@@ -247,6 +248,15 @@ CREATE TABLE UtenzaPersonale (
 	PRIMARY KEY(Personale)
 );
 
+CREATE TABLE RichiestaPrenotazione (
+	Paziente CHAR(16) REFERENCES Paziente(CF) ON UPDATE CASCADE,
+	Esame CHAR(5) REFERENCES Esame(Codice) ON UPDATE CASCADE,
+	RegimePrivato BOOLEAN NOT NULL,
+	-- True = Regime Privato, False = Regime Assistenza
+	Descrizione VARCHAR(255),
+	PRIMARY KEY(Paziente, Esame)
+);
+
 -- Una Stanza che ospita un Laboratorio Interno non può avere un valore per l’attributo NumeroLetti, poiché non è adibita al Ricovero. !!
 CREATE OR REPLACE FUNCTION check_lab()
 RETURNS TRIGGER AS $$
@@ -261,7 +271,7 @@ $$ LANGUAGE plpgsql;
 
 
 CREATE TRIGGER check_lab_trigger
-BEFORE INSERT ON LaboratorioInterno
+BEFORE INSERT OR UPDATE ON LaboratorioInterno
 FOR EACH ROW
 EXECUTE FUNCTION check_lab();
 
@@ -280,7 +290,7 @@ $$ LANGUAGE plpgsql;
 
 
 CREATE TRIGGER check_reparto_trigger
-BEFORE INSERT ON PersonaleAmministrativo
+BEFORE INSERT OR UPDATE ON PersonaleAmministrativo
 FOR EACH ROW
 EXECUTE FUNCTION check_reparto();
 
@@ -300,7 +310,7 @@ $$ LANGUAGE plpgsql;
 
 
 CREATE TRIGGER check_reparto_primario_trigger
-BEFORE INSERT ON Primario
+BEFORE INSERT OR UPDATE ON Primario
 FOR EACH ROW
 EXECUTE FUNCTION check_reparto_primario();
 
@@ -320,7 +330,7 @@ $$ LANGUAGE plpgsql;
 
 
 CREATE TRIGGER check_reparto_vice_primario_trigger
-BEFORE INSERT ON VicePrimario
+BEFORE INSERT OR UPDATE ON VicePrimario
 FOR EACH ROW
 EXECUTE FUNCTION check_reparto_vice_primario();
 
@@ -340,7 +350,7 @@ $$ LANGUAGE plpgsql;
 
 
 CREATE TRIGGER check_primario_trigger
-BEFORE INSERT ON Primario
+BEFORE INSERT OR UPDATE ON Primario
 FOR EACH ROW
 EXECUTE FUNCTION check_primario();
 
@@ -357,7 +367,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER check_reparto_sostituzione_trigger
-BEFORE INSERT ON Sostituzione
+BEFORE INSERT OR UPDATE ON Sostituzione
 FOR EACH ROW
 EXECUTE FUNCTION check_reparto_sostituzione();
 
@@ -379,7 +389,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER check_turno_in_corso_trigger
-BEFORE INSERT ON TurnoPS
+BEFORE INSERT OR UPDATE ON TurnoPS
 FOR EACH ROW
 EXECUTE FUNCTION check_turno_in_corso();
 
@@ -399,7 +409,7 @@ $$ LANGUAGE plpgsql;
 
 
 CREATE TRIGGER check_letti_trigger
-BEFORE INSERT ON Ricovero
+BEFORE INSERT OR UPDATE ON Ricovero
 FOR EACH ROW
 EXECUTE FUNCTION check_letti();
 
@@ -433,7 +443,7 @@ $$ LANGUAGE plpgsql;
 
 
 CREATE TRIGGER check_letti_stanza_trigger
-BEFORE INSERT ON Ricovero
+BEFORE INSERT OR UPDATE ON Ricovero
 FOR EACH ROW
 EXECUTE FUNCTION check_letti_stanza();
 
@@ -455,7 +465,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER check_ricovero_in_corso_trigger
-BEFORE INSERT ON Ricovero
+BEFORE INSERT OR UPDATE ON Ricovero
 FOR EACH ROW
 EXECUTE FUNCTION check_ricovero_in_corso();
 
@@ -476,9 +486,26 @@ END;
 $$ LANGUAGE plpgsql;
 
 
-
 CREATE TRIGGER check_medico_prescrittore_trigger
-BEFORE INSERT ON Prenotazione
+BEFORE INSERT OR UPDATE ON Prenotazione
 FOR EACH ROW
 EXECUTE FUNCTION check_medico_prescrittore();
 
+
+CREATE OR REPLACE FUNCTION check_and_delete_richiesta()
+RETURNS TRIGGER AS $$
+BEGIN
+    -- Delete from RichiestaPrenotazione where there's a match on Paziente and Esame
+    DELETE FROM RichiestaPrenotazione
+    WHERE Paziente = NEW.Paziente
+      AND Esame = NEW.Esame;
+    
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE TRIGGER trigger_check_and_delete
+AFTER INSERT OR UPDATE ON Prenotazione
+FOR EACH ROW
+EXECUTE FUNCTION check_and_delete_richiesta();

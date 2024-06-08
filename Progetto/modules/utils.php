@@ -113,7 +113,7 @@ function getReferentialInputField($connection, &$columns, $foreignKeys, $referen
     $constraintName = $referencedTable['constraint'];
     $referencedTable = $referencedTable['referredtable'];
     foreach ($foreignKeys as $fk) {
-        if ($fk['referredtable'] == $referencedTable && $constraintName = $fk['constraint_name']) {
+        if ($fk['referredtable'] == $referencedTable && $constraintName == $fk['constraint_name']) {
             $referencedData[] = $fk;
         }
     }
@@ -145,6 +145,17 @@ function getReferentialInputField($connection, &$columns, $foreignKeys, $referen
     }, $referringColumns);
     $value = implode(', ', $values);
 
+    //Special constraints can have special descriptions HERE 
+    if ($constraintName == "ricovero_reparto_stanza_fkey") {
+        $query = "SELECT {$referencedColumnsString}, numeroletti FROM {$referencedTable}";
+        try {
+            $dataForSelectInputToVisualize = executeQuery($connection, $query);
+        } catch (Exception $e) {
+            memorizeError("Lettura dal Database", $e->getMessage());
+            header("Refresh:0");
+        }
+        $dataForSelectInputToVisualize = array_map(fn ($el) => implode(', ', $el), pg_fetch_all($dataForSelectInputToVisualize));
+    }
 
-    return buildInputSelect($referringColumnsString, $dataForSelectInput, $isRequired, $toedit, $value);
+    return buildInputSelect($referringColumnsString, $dataForSelectInput, $isRequired, $toedit, $value, $dataForSelectInputToVisualize);
 }

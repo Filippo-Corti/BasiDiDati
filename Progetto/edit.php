@@ -1,17 +1,11 @@
 <?php
 session_start();
 
-if (isset($_POST['table'])) {
-    $table = $_POST['table'];
-    $_SESSION['table'] = $table;
-} else {
-    $table = $_SESSION['table'];
-}
-
 foreach (glob("modules/*.php") as $filename) {
     include $filename;
 }
 
+$table = $_SESSION['table'];
 
 ?>
 <!DOCTYPE html>
@@ -63,7 +57,9 @@ foreach (glob("modules/*.php") as $filename) {
                         </h3>
                     </div>
                     <div>
-                        <form method="POST" action="view.php">
+                        <form method="POST" action="opmanager.php">
+                            <input type="hidden" name="operation" value="goto_view">
+                            <input type="hidden" name="table" value="<?php echo $table ?>">
                             <button class="btn rounded-pill btn-mine" type="submit">
                                 <span class="poppins fw-normal"> &lt;</span> Torna alla Tabella
                             </button>
@@ -73,6 +69,7 @@ foreach (glob("modules/*.php") as $filename) {
                 <div class="m-3">
                     <form method="POST" action="opmanager.php">
                         <input type="hidden" name="operation" value="update">
+                        <input type="hidden" name="table" value="<?php echo $table ?>">
                         <?php echo buildInsertFormForEdit(); ?>
                         <input class="btn rounded-pill btn-mine" type="submit" value="Modifica">
 

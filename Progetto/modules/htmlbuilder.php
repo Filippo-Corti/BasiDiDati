@@ -15,7 +15,7 @@ function buildTable($results, $columns, $table, $actions)
     $str .= '</tr>';
     foreach ($results as $row) {
         $str .= '<tr><form method="POST" action="opmanager.php">';
-        $str .= "<input type='hidden' table='{$table}'>";
+        $str .= "<input type='hidden' name='table' value='{$table}'>";
         foreach ($columns as $col) {
             $str .= "<td> <input type='hidden' name='{$col}' value='{$row[$col]}'> {$row[$col]} </td>";
         }
@@ -61,6 +61,25 @@ function buildToast($id, $type, $title, $content)
                 </div>
             </div>
     EOD;
+}
+
+function buildAppointmentsTimeline($appointments) {
+    $str = "";
+    foreach($appointments as $app) {
+        $urgency = getUrgencyColor($app['urgenza']);
+        $regime = ($app['regimeprivato']) ? "Regime Privato ({$app['costo']}€)" : "Regime Assistenziale ({$app['costo']}€)";
+        $str .= <<<EOD
+            <div class="tl-item">
+                <div class="tl-dot b-{$urgency}"></div>
+                <div class="tl-content">
+                    <div class="fw-semibold">{$app['descrizione']}</div>
+                    <div>Presso {$app['indirizzo']} con {$regime}</div>
+                    <div class="tl-date text-muted mt-1">Il {$app['dataesame']} alle {$app['oraesame']}</div>
+                </div>
+            </div>
+    EOD;
+    }
+    return $str;
 }
 
 function buildInputText($name, $minsize, $maxsize, $required, $editable = true, $value = NULL)
@@ -158,8 +177,12 @@ function buildInputDateTime($name, $required, $editable = true, $value = NULL)
     EOD;
 }
 
-function buildInputSelect($name, $options, $required, $editable = true, $value = NULL)
+function buildInputSelect($name, $options, $required, $editable = true, $value = NULL, $visualizedOptions = null)
 {
+    if (!$visualizedOptions) {
+        $visualizedOptions = $options;
+    }
+
     $getRequired = getRequired($required);
     $getEditable = "";
     $getAlternativeInput = "";
@@ -170,13 +193,15 @@ function buildInputSelect($name, $options, $required, $editable = true, $value =
 
     $optionsStr = "";
     $selected = false;
+    $i = 0;
     foreach ($options as $option) {
-        if ($option == $value) {
-            $optionsStr .= "<option value='{$option}' selected>{$option}</option>";
+        if ($option == $value ||  $visualizedOptions[$i] == $value) {
+            $optionsStr .= "<option value='{$option}' selected>{$visualizedOptions[$i]}</option>";
             $selected = true;
         } else {
-            $optionsStr .= "<option value='{$option}'>{$option}</option>";
+            $optionsStr .= "<option value='{$option}'>{$visualizedOptions[$i]}</option>";
         }
+        $i++;
     }
 
     if (!$selected) {
@@ -208,4 +233,16 @@ function getEditable($e)
 function getValue($v)
 {
     return ($v) ? "value='{$v}'" : "";
+}
+
+function getUrgencyColor($u) {
+    switch($u) {
+        case 'Rosso':
+            return "danger";
+        case 'Giallo':
+            return "warning";
+        case 'Verde':
+            return "success";
+    }
+    return "";
 }

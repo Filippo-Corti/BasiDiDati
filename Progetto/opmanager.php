@@ -28,7 +28,12 @@ switch ($operation) {
         $_SESSION['edit_data'] = $_POST;
         header("Location: {$DEFAULT_DIR}/edit.php");
         exit();
+    case 'goto_view':
+        $_SESSION['table'] = $table;
+        header("Location: {$DEFAULT_DIR}/view.php");
+        exit();
     case 'insert':
+        $_SESSION['table'] = $table;
         $attributes = array_filter($attributes, fn ($el) => $el);
         $names = implode(", ", array_keys($attributes));
         $values = implode(", ", array_map(fn ($el) => "'" . $el . "'", array_values($attributes)));
@@ -36,11 +41,13 @@ switch ($operation) {
         header("Location: {$DEFAULT_DIR}/view.php");
         exit();
     case 'update':
+        $_SESSION['table'] = $table;
         updateIntoDatabase($connection, $table, $attributes);
         unset($_SESSION['edit_data']);
         header("Location: {$DEFAULT_DIR}/view.php");
         exit();
     case 'delete':
+        $_SESSION['table'] = $table;
         deleteFromDatabase($connection, $table);
         header("Location: {$DEFAULT_DIR}/view.php");
         exit();
@@ -60,6 +67,15 @@ switch ($operation) {
         $_SESSION['query'] = "SELECT * FROM Prenotazione WHERE Paziente = '{$loggedUser['username']}'";
         $_SESSION['query_title'] = "Prenotazioni per {$loggedUser['username']}";
         header("Location: {$DEFAULT_DIR}/view.php");
+        exit();
+    case 'view_hospitalizations':
+        $_SESSION['query'] = "SELECT * FROM Ricovero WHERE Paziente = '{$loggedUser['username']}'";
+        $_SESSION['query_title'] = "Ricoveri per {$loggedUser['username']}";
+        header("Location: {$DEFAULT_DIR}/view.php");
+        exit();
+    case 'request_appointment':
+        $_SESSION['table'] = "prenotazione";
+        header("Location: {$DEFAULT_DIR}/insert.php");
         exit();
 }
 
@@ -154,7 +170,7 @@ function loginAsWorker($connection)
 
     global $DEFAULT_DIR;
 
-    $query = "SELECT * FROM UtenzaPersonale WHERE paziente = $1;";
+    $query = "SELECT * FROM UtenzaPersonale WHERE personale = $1;";
     try {
         $result = pg_fetch_array(executeQuery($connection, $query, array($_POST['Username'])));
         if (password_verify($_POST['Password'], $result['hashedpassword'])) {

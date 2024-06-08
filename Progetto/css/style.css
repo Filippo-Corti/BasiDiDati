@@ -37,6 +37,10 @@ tr {
     border-bottom: 1px solid rgb(222, 226, 230) !important;
 }
 
+tr:last-of-type {
+    border-bottom: 0px !important;
+}
+
 td,
 th {
     padding: 0.8rem 1rem !important;
@@ -140,59 +144,11 @@ input:read-only:not[type='checkbox'] {
 
 /* Timeline [from https://bbbootstrap.com/snippets/basic-timeline-for-users-without-avatar-37843493] */
 
-@media (min-width:992px) {
-    .page-sidenav {
-        display: block !important
-    }
-}
-
-.padding {
-    padding: 2rem
-}
-
-.w-32 {
-    width: 32px !important;
-    height: 32px !important;
-    font-size: .85em
-}
-
-.tl-item .avatar {
-    z-index: 2
-}
-
-.circle {
-    border-radius: 500px
-}
-
-.gd-warning {
-    color: #fff;
-    border: none;
-    background: #f4c414 linear-gradient(45deg, #f4c414, #f45414)
-}
-
 .timeline {
     position: relative;
     border-color: rgba(160, 175, 185, .15);
     padding: 0;
     margin: 0
-}
-
-.p-4 {
-    padding: 1.5rem !important
-}
-
-.block,
-.card {
-    background: #fff;
-    border-width: 0;
-    border-radius: .25rem;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, .05);
-    margin-bottom: 1.5rem
-}
-
-.mb-4,
-.my-4 {
-    margin-bottom: 1.5rem !important
 }
 
 .tl-item {
@@ -204,10 +160,6 @@ input:read-only:not[type='checkbox'] {
 
 .tl-item>* {
     padding: 10px
-}
-
-.tl-item .avatar {
-    z-index: 2
 }
 
 .tl-item:last-child .tl-dot:after {
@@ -303,34 +255,14 @@ tl-item.active .tl-dot:before {
     font-size: .85em;
     margin-top: 2px;
     min-width: 100px;
-    max-width: 100px
-}
-
-.avatar {
-    position: relative;
-    line-height: 1;
-    border-radius: 500px;
-    white-space: nowrap;
-    font-weight: 700;
-    border-radius: 100%;
-    display: -ms-flexbox;
-    display: flex;
-    -ms-flex-pack: center;
-    justify-content: center;
-    -ms-flex-align: center;
-    align-items: center;
-    -ms-flex-negative: 0;
-    flex-shrink: 0;
-    border-radius: 500px;
-    box-shadow: 0 5px 10px 0 rgba(50, 50, 50, .15)
 }
 
 .b-warning {
     border-color: #f4c414!important;
 }
 
-.b-primary {
-    border-color: #448bff!important;
+.b-success {
+    border-color: #167347!important;
 }
 
 .b-danger {
