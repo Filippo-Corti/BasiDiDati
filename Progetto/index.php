@@ -35,34 +35,49 @@ foreach (glob("modules/*.php") as $filename) {
             </div>
         </div>
         <div>
-            <a class="d-flex flex-columns align-items-center justify-content-center" href="login.php">
-                <button class="btn rounded-pill btn-mine-light ">
-                    <span class="poppins fw-normal"> &gt;</span> Accedi al Portale
+            <form action="opmanager.php" method="POST">
+                <input type="hidden" name="operation" value="logout">
+                <button type="submit" class="btn rounded-pill btn-mine-light ">
+                    <span class="poppins fw-normal"> &gt;</span> Disconnettiti
                 </button>
-            </a>
+            </form>
         </div>
     </header>
 
     <section class="container mx-auto">
-        <div class="my-5 mx-4">
-            <div class="rounded-5 p-5 bg-white shadow-accent">
-                <div class="d-flex align-items-center justify-content-between gap-1">
-                    <div class="pb-1 fw-semibold">
-                        <p class="my-0 py-0 text-green fw-semibold fs-6" style="transform:translateY(4px);">Home Page
-                        </p>
-                        <h3 class="m-0 p-0 fw-bold">Home Page</h3>
-                    </div>
-                    <div>
-                        <a class="d-flex flex-columns align-items-center justify-content-center" href="">
-                            <button class="btn rounded-pill btn-mine">
-                                <span class="poppins fw-normal"> &gt;</span> Visualizza la Tabella
-                            </button>
-                        </a>
-                    </div>
+        <?php
+
+        if (!isset($_SESSION['logged_user'])) {
+            memorizeError("Accesso", "Accedi per poter accedere alla Home Page");
+            header("Location: {$DEFAULT_DIR}/login.php");
+            exit();
+        }
+
+        $loggedUser = $_SESSION['logged_user'];
+
+        switch ($loggedUser['type']) {
+            case 'patient':
+                echo loadPatientHomePage();
+                break;
+            case 'worker':
+                echo loadWorkerHomePage();
+                break;
+        }
+
+        ?>
+        </div>
+        <div class="timeline p-4 block mb-4">
+            <div class="tl-item">
+                <div class="tl-dot b-warning"></div>
+                <div class="tl-content">
+                    <div class="fw-semibold">Titolo</div>
+                    <div>Descrizione</div>
+                    <div class="tl-date text-muted mt-1">Data</div>
                 </div>
             </div>
         </div>
 
+        </div>
     </section>
 
 
@@ -80,3 +95,65 @@ foreach (glob("modules/*.php") as $filename) {
 </body>
 
 </html>
+
+<?php
+
+function loadPatientHomePage()
+{
+    echo <<<EOD
+    <div class="my-5 mx-2">
+        <div class="rounded-5 py-3 px-3 bg-white shadow-accent">
+            <div class="px-3 d-flex justify-content-between gap-1">
+                <div class="pb-1 pt-4 ps-3">
+                    <p class="my-0 py-0 text-green fw-semibold fs-6">
+                        Home Page
+                    </p>
+                    <h3 class="m-0 p-0 fw-bold">
+                        Bentornato Filippo Corti
+                    </h3>
+                    <div class="mt-3 fs-5 ms-2">
+                        <p class="pb-1 m-0"> I tuoi dati:</p>
+                        <ul>
+                            <li> Codice Fiscale: CRTFPP03S07L319C </li>
+                            <li> Data di Nascita: 2003-11-07 (Età 20 anni) </li>
+                            <li> Indirizzo: (22075) Via XXV Aprile, 15 </li>
+                        </ul>
+                    </div>
+                </div>
+                <div>
+                    <img src="img/patient.webp">
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row my-5">
+        <div class="col-lg mx-2">
+            <div class="rounded-5 py-5 px-3 bg-white shadow-accent">
+                <a class="d-flex flex-columns align-items-center justify-content-center" href="">
+                    <form method="POST" action="opmanager.php">
+                        <input type="hidden" name="operation" value="view_appointments">
+                        <button class="btn rounded-pill btn-mine" type="submit">
+                            <span class="poppins fw-normal"> &gt;</span> Richiedi una Prenotazione
+                        </button>
+                    </form>
+                </a>
+            </div>
+        </div>
+        <div class="col-lg mx-2">
+            <div class="rounded-5 py-5 px-3 bg-white shadow-accent">
+            </div>
+        </div>
+    </div>
+    <div class="my-5 mx-2">
+        <div class="rounded-5 py-5 px-3 bg-white shadow-accent">
+        </div>
+    </div>
+    EOD;
+}
+
+function loadWorkerHomePage()
+{
+    echo "Benvenuto medico";
+}
+
+?>

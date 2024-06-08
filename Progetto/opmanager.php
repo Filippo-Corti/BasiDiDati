@@ -1,25 +1,33 @@
 <?php
 session_start();
 
-if (isset($_SESSION['table']) && $_SESSION['table'] != "") {
-    $table = $_SESSION['table'];
-} else if (isset($_POST['table'])) {
-    $table = $_POST['table'];
-    $_SESSION['table'] = $table;
-} else {
-}
 foreach (glob("modules/*.php") as $filename) {
     include $filename;
 }
 
-$operation = strtolower($_POST['operation']);
-
-$attributes = parsePostValues();
-
 $connection = connectToDatabase();
 
+//Get POST Data
+$table = strtolower($_POST['table']);
+$operation = strtolower($_POST['operation']);
+$attributes = parsePostValues();
 
+//Clear SESSION
+$loggedUser = $_SESSION['logged_user'];
+session_unset();
+$_SESSION['logged_user'] = $loggedUser;
+
+//Do OPERATION
 switch ($operation) {
+    case 'goto_insert':
+        $_SESSION['table'] = $table;
+        header("Location: {$DEFAULT_DIR}/insert.php");
+        exit();
+    case 'goto_update':
+        $_SESSION['table'] = $table;
+        $_SESSION['edit_data'] = $_POST;
+        header("Location: {$DEFAULT_DIR}/edit.php");
+        exit();
     case 'insert':
         $attributes = array_filter($attributes, fn ($el) => $el);
         $names = implode(", ", array_keys($attributes));
@@ -27,11 +35,7 @@ switch ($operation) {
         insertIntoDatabase($connection, $table, $names, $values);
         header("Location: {$DEFAULT_DIR}/view.php");
         exit();
-    case 'edit': //Redirect to Edit Page
-        $_SESSION['edit_data'] = $_POST;
-        header("Location: {$DEFAULT_DIR}/edit.php");
-        exit();
-    case 'update': //Actually update the DB
+    case 'update':
         updateIntoDatabase($connection, $table, $attributes);
         unset($_SESSION['edit_data']);
         header("Location: {$DEFAULT_DIR}/view.php");
@@ -47,6 +51,15 @@ switch ($operation) {
     case 'login_as_worker':
         loginAsWorker($connection);
         header("Location: {$DEFAULT_DIR}/index.php");
+        exit();
+    case 'logout':
+        unset($_SESSION['logged_user']);
+        header("Location: {$DEFAULT_DIR}/login.php");
+        exit();
+    case 'view_appointments':
+        $_SESSION['query'] = "SELECT * FROM Prenotazione WHERE Paziente = '{$loggedUser['username']}'";
+        $_SESSION['query_title'] = "Prenotazioni per {$loggedUser['username']}";
+        header("Location: {$DEFAULT_DIR}/view.php");
         exit();
 }
 
@@ -123,6 +136,7 @@ function loginAsPatient($connection)
         $result = pg_fetch_array(executeQuery($connection, $query, array($_POST['Username'])));
         if (password_verify($_POST['Password'], $result['hashedpassword'])) {
             memorizeSuccess("Login", "Operazione avvenuta con successo. Benvenuto {$_POST['Username']}.");
+            $_SESSION['logged_user'] = array('username' => $_POST['Username'], 'type' => 'patient');
         } else {
             memorizeError("Login", "Credenziali non valide. Riprovare.");
             header("Location: {$DEFAULT_DIR}/login.php");
@@ -145,6 +159,7 @@ function loginAsWorker($connection)
         $result = pg_fetch_array(executeQuery($connection, $query, array($_POST['Username'])));
         if (password_verify($_POST['Password'], $result['hashedpassword'])) {
             memorizeSuccess("Login", "Operazione avvenuta con successo. Benvenuto {$_POST['Username']}.");
+            $_SESSION['logged_user'] = array('username' => $_POST['Username'], 'type' => 'worker');
         } else {
             memorizeError("Login", "Credenziali non valide. Riprovare.");
             header("Location: {$DEFAULT_DIR}/login.php");

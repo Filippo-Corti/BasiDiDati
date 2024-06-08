@@ -1,5 +1,5 @@
 <?php
-//error_reporting(E_ERROR); //Hides Warnings
+error_reporting(E_ERROR); //Hides Warnings
 
 //Connection to Database
 function connectToDatabase()

@@ -1,6 +1,6 @@
 <?php
 
-function buildTable($results, $columns, $table)
+function buildTable($results, $columns, $table, $actions)
 {
     //Intestation
     $str = '<table class="w-100">';
@@ -9,15 +9,20 @@ function buildTable($results, $columns, $table)
         $col = ucfirst($col);
         $str .= "<th> {$col} </th>";
     }
-    $str .= "<th> Actions </th>";
+    if ($actions) {
+        $str .= "<th> Actions </th>";
+    }
     $str .= '</tr>';
     foreach ($results as $row) {
         $str .= '<tr><form method="POST" action="opmanager.php">';
+        $str .= "<input type='hidden' table='{$table}'>";
         foreach ($columns as $col) {
             $str .= "<td> <input type='hidden' name='{$col}' value='{$row[$col]}'> {$row[$col]} </td>";
         }
-        $str .= "<td><input type='submit' name='operation' value='Edit' class='btn btn-edit'>
-				<input type='submit' name='operation' value='Delete' class='btn btn-delete'></td>";
+        if ($actions) {
+            $str .= "<td><button type='submit' name='operation' value='goto_update' class='btn btn-edit'>Edit</button>
+            <button type='submit' name='operation' value='delete' class='btn btn-delete'>Delete</button></td>";
+        }
         $str .= '</form></tr>';
     }
     return $str . '</table>';

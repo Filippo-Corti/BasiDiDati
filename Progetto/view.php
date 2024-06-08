@@ -1,16 +1,25 @@
 <?php
 session_start();
 
-
-if (isset($_GET['table'])) {
-    $table = $_GET['table'];
-    $_SESSION['table'] = $table;
-} else if (isset($_SESSION['table']) && $_SESSION['table'] != "") {
-    $table = $_SESSION['table'];
-} else if (isset($_POST['table'])){
-    $table = $_POST['table'];
-    $_SESSION['table'] = $table;
+$databaseTable = true;
+if (isset($_SESSION['query'])) {
+    $databaseTable = false;
 }
+
+if ($databaseTable) {
+    if (isset($_GET['table'])) {
+        $table = $_GET['table'];
+        $_SESSION['table'] = $table;
+    } else if (isset($_SESSION['table']) && $_SESSION['table'] != "") {
+        $table = $_SESSION['table'];
+    } else if (isset($_POST['table'])) {
+        $table = $_POST['table'];
+        $_SESSION['table'] = $table;
+    }
+} 
+
+
+
 foreach (glob("modules/*.php") as $filename) {
     include $filename;
 }
@@ -58,23 +67,36 @@ foreach (glob("modules/*.php") as $filename) {
         <div class="my-5 mx-2">
             <div class="rounded-5 py-5 px-3 bg-white shadow-accent">
                 <div class="px-3 d-flex align-items-center justify-content-between gap-1">
-                    <div class="pb-1fw-semibold">
+                    <div class="pb-1 fw-semibold">
                         <p class="my-0 py-0 text-green fw-semibold fs-6" style="transform:translateY(4px);">
                             Visualizzazione
                         </p>
                         <h3 class="m-0 p-0 fw-bold">
-                            <?php echo ucfirst($table); ?>
+                            <?php
+                            if ($databaseTable) {
+                                echo ucfirst($table);
+                            } else {
+                                echo $_SESSION['query_title'];
+                            }
+                            ?>
                         </h3>
                     </div>
-                    <div>
-                        <a class="d-flex flex-columns align-items-center justify-content-center" href="">
-                            <form method="POST" action="insert.php">
-                                <button class="btn rounded-pill btn-mine" type="submit">
-                                    <span class="poppins fw-normal"> &gt;</span> Inserisci nella Tabella
-                                </button>
-                            </form>
-                        </a>
-                    </div>
+                    <?php
+                    if (!isset($_SESSION['query'])) {
+                        echo <<<EOD
+                        <div>
+                            <a class="d-flex flex-columns align-items-center justify-content-center" href="">
+                                <form method="POST" action="insert.php">
+                                    <input type="hidden" name="operation" value="goto_insert">
+                                    <input type="hidden" name="table" value="{$table}">
+                                    <button class="btn rounded-pill btn-mine" type="submit">
+                                        <span class="poppins fw-normal"> &gt;</span> Inserisci nella Tabella
+                                    </button>
+                                </form>
+                            </a>
+                        </div>
+                    EOD;
+                    } ?>
                 </div>
                 <div class="d-flex justify-content-center mt-3">
                     <?php echo loadTable(); ?>
@@ -109,16 +131,26 @@ function loadTable()
     global $table;
 
     $connection = connectToDatabase();
-    $query = "SELECT * FROM {$table}";
+    $actions = false;
+
     try {
-        $results = pg_fetch_all(executeQuery($connection, $query));
+        if (isset($_SESSION['query'])) {
+            $query = $_SESSION['query'];
+            $results = pg_fetch_all(executeQuery($connection, $query));
+            $columns = array_keys($results[0]);
+        } else {
+            $query = "SELECT * FROM {$table}";
+            $results = pg_fetch_all(executeQuery($connection, $query));
+            $columns = array_map(fn ($el) => $el['column_name'], getColumnsInformation($connection, $table));
+            $actions = true;
+        }
     } catch (Exception $e) {
         memorizeError("Lettura dal Database", $e->getMessage());
         header("Refresh:0");
     }
-    $columns = array_map(fn ($el) => $el['column_name'], getColumnsInformation($connection, $table));
 
-    return buildTable($results, $columns, $table);
+
+    return buildTable($results, $columns, $table, $actions);
 }
 
 
