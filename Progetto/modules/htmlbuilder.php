@@ -84,11 +84,17 @@ function buildInputNumber($name, $totalDigits, $decimalDigits, $required, $edita
     EOD;
 }
 
-function buildInputBoolean($name)
+function buildInputBoolean($name, $required, $editable = true, $checked = false)
 {
+    $getRequired = getRequired($required);
+    $getEditable = getEditable($editable);
+    $checkedStr = ($checked) ? "checked" : "";
+
     return <<<EOD
-        <label class="form-label" for="{$name}">{$name}:</label>
-        <input class="form-control rounded-pill" name="{$name}" type="checkbox">
+        <label class="form-check-label" for="{$name}">{$name}:</label>
+        <input name="{$name}" type="hidden" value="f">
+        <input class="form-check-input" name="{$name}" type="checkbox" value="t" {$getRequired} {$getEditable} {$checkedStr}>
+        <br>
         <br>
     EOD;
 }

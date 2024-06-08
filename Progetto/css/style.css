@@ -30,7 +30,7 @@ body {
 /* Tables */
 
 table {
-    font-size: clamp(0.688rem, -0.023rem + 1.136vi, 1rem) !important;
+    font-size: clamp(0.75rem, 0.4659rem + 0.4545vw, 0.875rem) !important;
 }
 
 tr {
@@ -107,7 +107,7 @@ td {
     color: #17b792
 }
 
-input:read-only {
+input:read-only:not[type='checkbox'] {
     background-color: #f5f5f5; /* Same as input:disabled */
     color: #6c757d; /* Typically the same as input:disabled in most browsers */
     cursor: not-allowed; /* Same as input:disabled */

@@ -34,13 +34,6 @@ foreach (glob("modules/*.php") as $filename) {
                 <h2 class="my-0 py-0 fw-bold">Gestore Aziende Ospedaliere</h2>
             </div>
         </div>
-        <div>
-            <a class="d-flex flex-columns align-items-center justify-content-center" href="">
-                <button class="btn rounded-pill btn-mine-light ">
-                    <span class="poppins fw-normal"> &lt;</span> Torna alla Home
-                </button>
-            </a>
-        </div>
     </header>
 
     <section class="container mx-auto">

@@ -27,6 +27,8 @@ function notifyNewMessages()
         return;
     }
 
+    $_SESSION['inbox'] = array_unique($_SESSION['inbox']);
+
     $str = "";
     $i = 0;
     foreach ($_SESSION['inbox'] as $msg) {
@@ -82,6 +84,8 @@ function getStandardInputField($connection, $column_data, $editable = true, $val
             return buildInputTime($name, $column_data['is_nullable'] == 'NO', $editable, $value);
         case 'timestamp':
             return buildInputDateTime($name, $column_data['is_nullable'] == 'NO', $editable, $value);
+        case 'bool':
+            return buildInputBoolean($name, false, $editable, $value == 't');
         default:
             //User-defined Enum
             $query = "SELECT enum_range(NULL::{$field_type})";

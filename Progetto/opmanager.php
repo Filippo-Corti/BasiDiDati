@@ -90,6 +90,7 @@ function updateIntoDatabase($connection, $table, $values) {
     $findCondition = "WHERE ";
     $editCondition = "";
     foreach($values as $k => $v) {
+        if (!$v) continue; //Avoid statements like "Attribute = NULL"
         if (in_array(strtolower($k), $pkeys)) {
             $findCondition .= "{$k} = '{$v}' AND ";
         }

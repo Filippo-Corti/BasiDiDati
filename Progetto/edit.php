@@ -42,7 +42,7 @@ foreach (glob("modules/*.php") as $filename) {
             </div>
         </div>
         <div>
-            <a class="d-flex flex-columns align-items-center justify-content-center" href="">
+            <a class="d-flex flex-columns align-items-center justify-content-center" href="index.php">
                 <button class="btn rounded-pill btn-mine-light ">
                     <span class="poppins fw-normal"> &lt;</span> Torna alla Home
                 </button>
