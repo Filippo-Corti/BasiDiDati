@@ -6,6 +6,7 @@ foreach (glob("modules/*.php") as $filename) {
 }
 
 $table = $_SESSION['table'];
+$actions = $_SESSION['logged_user']['type'] == 'worker';
 
 ?>
 <!DOCTYPE html>
@@ -56,15 +57,21 @@ $table = $_SESSION['table'];
               <?php echo ucfirst($table) ?>
             </h3>
           </div>
-          <div>
-            <form method="POST" action="opmanager.php">
-              <input type="hidden" name="operation" value="goto_view">
-              <input type="hidden" name="table" value="<?php echo $table ?>">
-              <button class="btn rounded-pill btn-mine" type="submit">
-                <span class="poppins fw-normal"> &lt;</span> Visualizza la Tabella
-              </button>
-            </form>
-          </div>
+            <?php
+                if ($table && $actions) {
+                  echo <<<EOD
+                    <div>
+                      <form method="POST" action="opmanager.php">
+                        <input type="hidden" name="operation" value="goto_view">
+                        <input type="hidden" name="table" value="$table">
+                        <button class="btn rounded-pill btn-mine" type="submit">
+                          <span class="poppins fw-normal"> &lt;</span> Visualizza la Tabella
+                        </button>
+                      </form>
+                    </div>
+                  EOD;
+                };
+            ?>
         </div>
         <div class="m-3">
           <form method="POST" action="opmanager.php">
@@ -118,9 +125,16 @@ function buildInsertForm()
     $alreadyInsertedValues = NULL;
   }
 
+  if (isset($_SESSION['disabled_fields'])) {
+    $disabledFields = $_SESSION['disabled_fields'];
+    unset($_SESSION['disabled_fields']);
+  } else {
+    $disabledFields = NULL;
+  }
+
  
-  $formFields += getReferentialInputFields($connection, $columns, $foreignKeys, NULL, $alreadyInsertedValues);
-  $formFields += getStandardInputFields($connection, $columns, NULL, $alreadyInsertedValues);
+  $formFields += getReferentialInputFields($connection, $columns, $foreignKeys, $disabledFields, $alreadyInsertedValues);
+  $formFields += getStandardInputFields($connection, $columns, $disabledFields, $alreadyInsertedValues);
 
   ksort($formFields);
 

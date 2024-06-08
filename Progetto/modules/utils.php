@@ -146,8 +146,8 @@ function getReferentialInputField($connection, &$columns, $foreignKeys, $referen
     $value = implode(', ', $values);
 
     //Special constraints can have special descriptions HERE 
-    if ($constraintName == "ricovero_reparto_stanza_fkey") {
-        $query = "SELECT {$referencedColumnsString}, numeroletti FROM {$referencedTable}";
+    if ($constraintName == "richiestaprenotazione_esame_fkey") {
+        $query = "SELECT descrizione FROM {$referencedTable}";
         try {
             $dataForSelectInputToVisualize = executeQuery($connection, $query);
         } catch (Exception $e) {

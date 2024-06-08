@@ -74,7 +74,9 @@ switch ($operation) {
         header("Location: {$DEFAULT_DIR}/view.php");
         exit();
     case 'request_appointment':
-        $_SESSION['table'] = "prenotazione";
+        $_SESSION['table'] = "richiestaprenotazione";
+        $_SESSION['inserted_data'] = array("paziente" => $loggedUser['username']);
+        $_SESSION['disabled_fields'] = array("paziente");
         header("Location: {$DEFAULT_DIR}/insert.php");
         exit();
 }

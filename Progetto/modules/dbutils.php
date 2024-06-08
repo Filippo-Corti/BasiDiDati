@@ -94,7 +94,8 @@ function getPatientFutureAppointments($connection, $cf) {
             LEFT JOIN Ospedale O ON R.ospedale = O.codice
 
         WHERE paziente = $1
-        AND dataesame >= CURRENT_DATE;
+        AND dataesame >= CURRENT_DATE
+        ORDER BY dataesame;
     QRY;
     try {
         return pg_fetch_all(executeQuery($connection, $query, array($cf)));

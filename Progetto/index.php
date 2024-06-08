@@ -120,7 +120,7 @@ function loadPatientHomePage()
                         <table class="ps-5">
                             <tr> <th class="text-uppercase fw-semibold"> Codice Fiscale </th><td class="my-1"> {$userData['cf']} </td> </tr>
                             <tr> <th class="text-uppercase fw-semibold"> Data di Nascita </th><td class="my-1"> {$userData['datanascita']} (Età {$userData['eta']} anni) </td> </tr>
-                            <tr> <th class="text-uppercase fw-semibold"> Indirizzo </th><td class="my-1"> {$userData['cap']} Via {$userData['via']}, {$userData['nciv']} </td> </tr>
+                            <tr> <th class="text-uppercase fw-semibold"> Indirizzo </th><td class="my-1"> ({$userData['cap']}) Via {$userData['via']}, {$userData['nciv']} </td> </tr>
                         </table>
                     </div>
                 </div>
