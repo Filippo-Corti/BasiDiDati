@@ -192,7 +192,39 @@ function loadPatientHomePage()
 
 function loadWorkerHomePage()
 {
-    echo "Benvenuto medico";
+
+    global $loggedUser;
+
+    $connection = connectToDatabase();
+
+    $userData = getWorkerInfo($connection, $loggedUser['username']);
+
+    echo <<<EOD
+    <div class="my-5 mx-2">
+        <div class="rounded-5 py-3 px-3 bg-white shadow-accent">
+            <div class="px-3 d-flex justify-content-between gap-1">
+                <div class="pb-1 pt-4 ps-3">
+                    <p class="my-0 py-0 text-green fw-semibold fs-6">
+                        Home Page
+                    </p>
+                    <h3 class="m-0 p-0 fw-bold">
+                        Bentornato {$userData['nome']} {$userData['cognome']}
+                    </h3>
+                    <div class="mt-3 fs-5 ms-2">
+                        <table class="ps-5">
+                            <tr> <th class="text-uppercase fw-semibold"> Codice Fiscale </th><td class="my-1"> {$userData['cf']} </td> </tr>
+                            <tr> <th class="text-uppercase fw-semibold"> Data di Nascita </th><td class="my-1"> {$userData['datanascita']} (Età {$userData['eta']} anni) </td> </tr>
+                            <tr> <th class="text-uppercase fw-semibold"> Indirizzo </th><td class="my-1"> ({$userData['cap']}) Via {$userData['via']}, {$userData['nciv']} </td> </tr>
+                        </table>
+                    </div>
+                </div>
+                <div>
+                    <img src="img/worker.webp">
+                </div>
+            </div>
+        </div>
+    </div>
+    EOD;
 }
 
 ?>

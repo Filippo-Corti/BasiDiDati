@@ -75,6 +75,17 @@ function getPatientInfo($connection, $cf)
     }
 }
 
+function getWorkerInfo($connection, $cf)
+{
+    $query = "SELECT *, DATE_PART('YEAR', AGE(datanascita)) AS eta  FROM Personale WHERE CF = $1";
+    try {
+        return pg_fetch_all(executeQuery($connection, $query, array($cf)))[0];
+    } catch (Exception $e) {
+        memorizeError("Account non riconosciuto", $e->getMessage());
+        header("Refresh:0");
+    }
+}
+
 function getPatientFutureAppointments($connection, $cf) {
     $query = <<<QRY
         SELECT P.*, E.descrizione, 
