@@ -107,25 +107,27 @@ function loadPatientHomePage()
 
     echo <<<EOD
     <div class="my-5 mx-2">
-        <div class="rounded-5 py-3 px-3 bg-white shadow-accent">
-            <div class="px-3 d-flex justify-content-between gap-1">
-                <div class="pb-1 pt-4 ps-3">
-                    <p class="my-0 py-0 text-green fw-semibold fs-6">
-                        Home Page
-                    </p>
-                    <h3 class="m-0 p-0 fw-bold">
-                        Bentornato {$userData['nome']} {$userData['cognome']}
-                    </h3>
-                    <div class="mt-3 fs-5 ms-2">
-                        <table class="ps-5">
-                            <tr> <th class="text-uppercase fw-semibold"> Codice Fiscale </th><td class="my-1"> {$userData['cf']} </td> </tr>
-                            <tr> <th class="text-uppercase fw-semibold"> Data di Nascita </th><td class="my-1"> {$userData['datanascita']} (Età {$userData['eta']} anni) </td> </tr>
-                            <tr> <th class="text-uppercase fw-semibold"> Indirizzo </th><td class="my-1"> ({$userData['cap']}) Via {$userData['via']}, {$userData['nciv']} </td> </tr>
-                        </table>
+        <div class="bg-accent-gradient rounded-5 p-1">
+            <div class="rounded-5 py-3 px-3 bg-white shadow-accent">
+                <div class="px-3 d-flex justify-content-between gap-1">
+                    <div class="pb-1 pt-4 ps-3">
+                        <p class="my-0 py-0 text-green fw-semibold fs-6">
+                            Home Page
+                        </p>
+                        <h3 class="m-0 p-0 fw-bold">
+                            Bentornato {$userData['nome']} {$userData['cognome']}
+                        </h3>
+                        <div class="mt-3 fs-5 ms-2">
+                            <table class="ps-5">
+                                <tr> <th class="text-uppercase fw-semibold"> Codice Fiscale </th><td class="my-1"> {$userData['cf']} </td> </tr>
+                                <tr> <th class="text-uppercase fw-semibold"> Data di Nascita </th><td class="my-1"> {$userData['datanascita']} (Età {$userData['eta']} anni) </td> </tr>
+                                <tr> <th class="text-uppercase fw-semibold"> Indirizzo </th><td class="my-1"> ({$userData['cap']}) Via {$userData['via']}, {$userData['nciv']} </td> </tr>
+                            </table>
+                        </div>
                     </div>
-                </div>
-                <div>
-                    <img src="img/patient.webp">
+                    <div>
+                        <img src="img/patient.webp">
+                    </div>
                 </div>
             </div>
         </div>
@@ -199,27 +201,128 @@ function loadWorkerHomePage()
 
     $userData = getWorkerInfo($connection, $loggedUser['username']);
 
+    $appointmentRequests = getAppointmentRequests($connection);
+    $countRequests = count($appointmentRequests);
+
+    $appointmentsTable = buildAppointmentRequestsTable($appointmentRequests);
+
+    $tables = array_map(fn ($el) => $el['table'], getAllTables($connection));
+    $tablesSelection = buildInputSelect("Tabella", array_map('ucfirst', $tables), true);
+
     echo <<<EOD
     <div class="my-5 mx-2">
-        <div class="rounded-5 py-3 px-3 bg-white shadow-accent">
-            <div class="px-3 d-flex justify-content-between gap-1">
-                <div class="pb-1 pt-4 ps-3">
-                    <p class="my-0 py-0 text-green fw-semibold fs-6">
-                        Home Page
-                    </p>
-                    <h3 class="m-0 p-0 fw-bold">
-                        Bentornato {$userData['nome']} {$userData['cognome']}
-                    </h3>
-                    <div class="mt-3 fs-5 ms-2">
-                        <table class="ps-5">
-                            <tr> <th class="text-uppercase fw-semibold"> Codice Fiscale </th><td class="my-1"> {$userData['cf']} </td> </tr>
-                            <tr> <th class="text-uppercase fw-semibold"> Data di Nascita </th><td class="my-1"> {$userData['datanascita']} (Età {$userData['eta']} anni) </td> </tr>
-                            <tr> <th class="text-uppercase fw-semibold"> Indirizzo </th><td class="my-1"> ({$userData['cap']}) Via {$userData['via']}, {$userData['nciv']} </td> </tr>
-                        </table>
+        <div class="bg-accent-gradient rounded-5 p-1">
+            <div class="rounded-5 py-3 px-3 bg-white shadow-accent">
+                <div class="px-3 d-flex justify-content-between gap-1">
+                    <div class="pb-1 pt-4 ps-3">
+                        <p class="my-0 py-0 text-green fw-semibold fs-6">
+                            Home Page
+                        </p>
+                        <h3 class="m-0 p-0 fw-bold">
+                            Bentornato {$userData['nome']} {$userData['cognome']}
+                        </h3>
+                        <div class="mt-3 fs-5 ms-2">
+                            <table class="ps-5">
+                                <tr> <th class="text-uppercase fw-semibold"> Codice Fiscale </th><td class="my-1"> {$userData['cf']} </td> </tr>
+                                <tr> <th class="text-uppercase fw-semibold"> Data di Nascita </th><td class="my-1"> {$userData['datanascita']} (Età {$userData['eta']} anni) </td> </tr>
+                                <tr> <th class="text-uppercase fw-semibold"> Indirizzo </th><td class="my-1"> ({$userData['cap']}) Via {$userData['via']}, {$userData['nciv']} </td> </tr>
+                            </table>
+                        </div>
+                    </div>
+                    <div>
+                        <img src="img/worker.webp">
                     </div>
                 </div>
-                <div>
-                    <img src="img/worker.webp">
+            </div>
+        </div>
+    </div>
+    
+    <div class="my-5 mx-2">
+        <div class="rounded-5 py-5 px-3 bg-white shadow-accent">
+            <h4 class="m-0 p-0 fw-bold ps-4">
+                Ci sono {$countRequests} Richieste di Prenotazione:
+            </h4>
+            <div class="mt-3 fs-5 ms-2">
+                {$appointmentsTable}
+            </div>
+        </div>
+    </div>
+
+    <div class="my-5 mx-2 d-flex justify-content-around flex-wrap gap-4">
+        <div class="action-card rounded-5 p-1">
+            <div class="rounded-5 py-5 m px-3 bg-white shadow-accent" style="max-width:15rem">
+                <h5 class="m-0 p-0 fw-bold text-center" style="min-height:3lh">
+                    Visualizza Personale per Reparto
+                </h5>
+                <div class="mt-4 fs-5 ms-2 ps-4 d-flex justify-content-start">
+                    <a href="pages/personalereparto.php">
+                        <button class="btn rounded-pill btn-mine-light" type="submit">
+                            <span class="poppins fw-normal"> &gt;</span>  Vai alla pagina
+                        </button>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="action-card rounded-5 p-1">
+            <div class="rounded-5 py-5 m px-3 bg-white shadow-accent" style="max-width:15rem">
+                <h5 class="m-0 p-0 fw-bold text-center" style="min-height:3lh">
+                    Visualizza Ricoveri per Paziente
+                </h5>
+                <div class="mt-4 fs-5 ms-2 ps-4 d-flex justify-content-start">
+                    <a href="pages/ricoveripaziente.php">
+                        <button class="btn rounded-pill btn-mine-light" type="submit">
+                            <span class="poppins fw-normal"> &gt;</span>  Vai alla pagina
+                        </button>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="action-card rounded-5 p-1">
+            <div class="rounded-5 py-5 m px-3 bg-white shadow-accent" style="max-width:15rem">
+                <h5 class="m-0 p-0 fw-bold text-center" style="min-height:3lh">
+                    Visualizza Vice Primari per Numero di Sostituzioni
+                </h5>
+                <div class="mt-4 fs-5 ms-2 ps-4 d-flex justify-content-start">
+                    <a href="pages/viceprimariinfo.php">
+                        <button class="btn rounded-pill btn-mine-light" type="submit">
+                            <span class="poppins fw-normal"> &gt;</span>  Vai alla pagina
+                        </button>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="my-5 mx-2 d-flex justify-content-around flex-wrap gap-4">
+        <div class="action-card rounded-5 p-1">
+            <div class="rounded-5 py-5 m px-3 bg-white shadow-accent" style="min-width:25rem">
+                <h5 class="m-0 p-0 fw-bold text-center">
+                    Visualizza una Tabella del DB
+                </h5>
+                <div class="mt-4 fs-5 ms-2 d-flex flex-column align-items-center justify-content-center gap-3">
+                    <form method="POST" action="opmanager.php">
+                        <input type="hidden" name="operation" value="view_table_by_select">
+                        {$tablesSelection}
+                        <button class="btn rounded-pill btn-mine-light" type="submit">
+                            <span class="poppins fw-normal"> &gt;</span>  Vai alla pagina
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="action-card rounded-5 p-1">
+            <div class="rounded-5 py-5 m px-3 bg-white shadow-accent" style="min-width:25rem">
+                <h5 class="m-0 p-0 fw-bold text-center">
+                    Inserisci in una Tabella del DB
+                </h5>
+                 <div class="mt-4 fs-5 ms-2 d-flex flex-column align-items-center justify-content-center gap-3">
+                    <form method="POST" action="opmanager.php">
+                        <input type="hidden" name="operation" value="insert_by_select">
+                        {$tablesSelection}
+                        <button class="btn rounded-pill btn-mine-light" type="submit">
+                            <span class="poppins fw-normal"> &gt;</span>  Vai alla pagina
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>

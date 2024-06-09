@@ -38,7 +38,11 @@ switch ($operation) {
         $names = implode(", ", array_keys($attributes));
         $values = implode(", ", array_map(fn ($el) => "'" . $el . "'", array_values($attributes)));
         insertIntoDatabase($connection, $table, $names, $values);
-        header("Location: {$DEFAULT_DIR}/view.php");
+        if ($loggedUser['type'] == 'patient') {
+            header("Location: {$DEFAULT_DIR}/index.php");
+        } else {
+            header("Location: {$DEFAULT_DIR}/view.php");
+        }
         exit();
     case 'update':
         $_SESSION['table'] = $table;
@@ -77,6 +81,19 @@ switch ($operation) {
         $_SESSION['table'] = "richiestaprenotazione";
         $_SESSION['inserted_data'] = array("paziente" => $loggedUser['username']);
         $_SESSION['disabled_fields'] = array("paziente");
+        header("Location: {$DEFAULT_DIR}/insert.php");
+        exit();
+    case 'appointment_from_request':
+        $_SESSION['table'] = "prenotazione";
+        $_SESSION['inserted_data'] = $_POST;
+        header("Location: {$DEFAULT_DIR}/insert.php");
+        exit();
+    case 'view_table_by_select':
+        $_SESSION['table'] = strtolower($_POST['Tabella']);
+        header("Location: {$DEFAULT_DIR}/view.php");
+        exit();
+    case 'insert_by_select':
+        $_SESSION['table'] = strtolower($_POST['Tabella']);
         header("Location: {$DEFAULT_DIR}/insert.php");
         exit();
 }

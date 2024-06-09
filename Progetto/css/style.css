@@ -123,6 +123,44 @@ td {
     color: #17b792
 }
 
+.action-card:nth-of-type(4n+0) {
+    background: var(--color-accent);
+    background: linear-gradient(227deg, rgb(169, 240, 208) 7%, rgb(23, 183, 146) 73%);
+}
+
+.action-card:nth-of-type(4n+1) {
+    background: var(--color-accent);
+    background: linear-gradient(227deg, rgb(169, 215, 240) 7%, rgb(23, 71, 183) 73%);
+}
+
+.action-card:nth-of-type(4n+2) {
+    background: var(--color-accent);
+    background: linear-gradient(227deg, rgb(240, 203, 169) 7%, rgb(183, 44, 23) 73%);
+}
+
+.action-card:nth-of-type(4n+3) {
+    background: var(--color-accent);
+    background: linear-gradient(227deg, rgb(242, 242, 125) 7%, rgb(230, 173, 5) 73%);
+}
+
+.new {
+    position: relative;
+}
+
+.new::after {
+    content: 'new';
+    text-transform: uppercase;
+    position: absolute;
+    top: 0;
+    right: -5%;
+    background-color: white;
+    font-weight: 500;
+    font-size: 0.875rem;
+    padding: 0.2rem 0.35rem;
+    border-radius: 200px;
+    border: 3px dashed var(--color-accent);
+}
+
 input:read-only:not[type='checkbox'] {
     background-color: #f5f5f5;
     /* Same as input:disabled */

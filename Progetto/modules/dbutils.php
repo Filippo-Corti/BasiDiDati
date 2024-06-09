@@ -38,10 +38,11 @@ function getForeignKeyConstraints($connection, $tableName)
     ON A.unique_constraint_name = B.constraint_name
     AND A.position_in_unique_constraint = B.ordinal_position
     WHERE A.constraint_name IN (
-      SELECT constraint_name
-      FROM information_schema.key_column_usage
-      WHERE table_name = $1
-      AND constraint_name LIKE '%_fkey'
+    SELECT KCU.constraint_name
+    FROM information_schema.key_column_usage KCU JOIN information_schema.table_constraints TC 
+        ON TC.constraint_name = KCU.constraint_name
+    WHERE TC.table_name = $1
+    AND constraint_type = 'FOREIGN KEY'
     )
     ORDER BY B.table_name, B.ordinal_position; 
   QRY;
@@ -86,7 +87,8 @@ function getWorkerInfo($connection, $cf)
     }
 }
 
-function getPatientFutureAppointments($connection, $cf) {
+function getPatientFutureAppointments($connection, $cf)
+{
     $query = <<<QRY
         SELECT P.*, E.descrizione, 
         CASE
@@ -116,7 +118,8 @@ function getPatientFutureAppointments($connection, $cf) {
     }
 }
 
-function getPatientLatestHospitalization($connection, $cf) {
+function getPatientLatestHospitalization($connection, $cf)
+{
     $query = <<<QRY
         SELECT RI.*, RE.nome AS reparto, O.nome AS ospedale
         FROM ricovero RI JOIN reparto RE ON RI.reparto = RE.codice JOIN ospedale O ON RE.ospedale = O.codice
@@ -135,7 +138,8 @@ function getPatientLatestHospitalization($connection, $cf) {
     }
 }
 
-function getDiagnosis($connection, $hospCode) {
+function getDiagnosis($connection, $hospCode)
+{
     $query = <<<QRY
         SELECT *
         FROM ricoveropatologia
@@ -143,10 +147,42 @@ function getDiagnosis($connection, $hospCode) {
     QRY;
     try {
         $results = pg_fetch_all(executeQuery($connection, $query, array($hospCode)));
-        $str = implode(", ", array_map(fn($el) => $el['patologia'], $results));
+        $str = implode(", ", array_map(fn ($el) => $el['patologia'], $results));
         return $str;
     } catch (Exception $e) {
         memorizeError("Impossibile recuperare i Ricoveri", $e->getMessage());
+        header("Refresh:0");
+    }
+}
+
+function getAppointmentRequests($connection)
+{
+    $query = <<<QRY
+        SELECT RP.paziente, E.codice, E.descrizione AS esame, RP.descrizione,
+        CASE
+            WHEN RP.regimeprivato THEN 'Si'
+            ELSE 'No'
+        END AS RegimePrivato
+        FROM richiestaprenotazione RP JOIN Esame E ON RP.esame = E.codice
+    QRY;
+    try {
+        return pg_fetch_all(executeQuery($connection, $query));
+    } catch (Exception $e) {
+        memorizeError("Impossibile recuperare le Richieste di Prenotazione", $e->getMessage());
+        header("Refresh:0");
+    }
+}
+
+function getAllTables($connection) {
+    $query = <<<QRY
+        SELECT table_name AS table
+        FROM information_schema.tables
+        WHERE table_schema = 'public'
+    QRY;
+    try {
+        return pg_fetch_all(executeQuery($connection, $query));
+    } catch (Exception $e) {
+        memorizeError("Impossibile recuperare le Tabelle del DB", $e->getMessage());
         header("Refresh:0");
     }
 }

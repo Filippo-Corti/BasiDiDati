@@ -1,6 +1,6 @@
 <?php
 
-function buildTable($results, $columns, $table, $actions)
+function buildTable($results, $columns, $table = NULL, $actions = false)
 {
     //Intestation
     $str = '<table class="w-100">';
@@ -63,9 +63,10 @@ function buildToast($id, $type, $title, $content)
     EOD;
 }
 
-function buildAppointmentsTimeline($appointments) {
+function buildAppointmentsTimeline($appointments)
+{
     $str = "";
-    foreach($appointments as $app) {
+    foreach ($appointments as $app) {
         $urgency = getUrgencyColor($app['urgenza']);
         $regime = ($app['regimeprivato']) ? "Regime Privato ({$app['costo']}€)" : "Regime Assistenziale ({$app['costo']}€)";
         $str .= <<<EOD
@@ -81,6 +82,36 @@ function buildAppointmentsTimeline($appointments) {
     }
     return $str;
 }
+
+function buildAppointmentRequestsTable($results) {
+    //Intestation
+    $str = '<table class="w-100">';
+    $str .= '<tr>';
+    foreach ($results[0] as $col => $v) {
+        $col = ucfirst($col);
+        $str .= "<th> {$col} </th>";
+    }
+    $str .= "<th> Actions </th>";
+    $str .= '</tr>';
+    foreach ($results as $row) {
+        $regimePrivato = ($row['regimeprivato'] == 'Si') ? 't' : 'f';
+        $str .= <<<EOD
+            <tr>
+                <form method="POST" action="opmanager.php">
+                    <input type="hidden" name="operation" value="appointment_from_request">
+                    <td> <input type='hidden' name='paziente' value='{$row['paziente']}'> {$row['paziente']} </td>
+                    <td> <input type='hidden' name='esame' value='{$row['codice']}'> {$row['codice']} </td>
+                    <td> {$row['esame']} </td>
+                    <td> {$row['descrizione']} </td>
+                    <td> <input type='hidden' name='regimeprivato' value='{$regimePrivato}'> {$row['regimeprivato']} </td>
+                    <td><button class="btn rounded-pill btn-mine-light" type="submit"><span class="poppins fw-normal"> &gt;</span> Crea una Prenotazione </button></td>
+                </form>
+            </tr>
+        EOD;
+    }
+    return $str . '</table>';
+}
+
 
 function buildInputText($name, $minsize, $maxsize, $required, $editable = true, $value = NULL)
 {
@@ -235,8 +266,9 @@ function getValue($v)
     return ($v) ? "value='{$v}'" : "";
 }
 
-function getUrgencyColor($u) {
-    switch($u) {
+function getUrgencyColor($u)
+{
+    switch ($u) {
         case 'Rosso':
             return "danger";
         case 'Giallo':

@@ -1,23 +1,16 @@
 <?php
 session_start();
 
-foreach (glob("modules/*.php") as $filename) {
+foreach (glob("../modules/*.php") as $filename) {
     include $filename;
 }
 
- 
-if (isset($_SESSION['query'])) {
-    //Personalized Query
-    $title = $_SESSION['query_title'];
-    $query = $_SESSION['query'];
-    $actions = false;
-} else {
-    //Standard Database Table view
-    $table = getTable();
-    $title = ucfirst($table);
-    $query = "SELECT * FROM {$table}";
-    $actions = $_SESSION['logged_user']['type'] == 'worker';
+$selected = NULL;
+if (isset($_POST['Reparto'])) {
+    $selected = $_POST['Reparto'];
 }
+
+$connection = connectToDatabase();
 
 ?>
 
@@ -26,11 +19,11 @@ if (isset($_SESSION['query'])) {
 
 <head>
     <meta charset="UTF-8" />
-    <title>Visualizzazione | Gestore Aziende Ospedaliere
+    <title>Personale Per Reparto | Gestore Aziende Ospedaliere
     </title>
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <link rel="icon" href="img/logo.svg">
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" href="../img/logo.svg">
+    <link rel="stylesheet" href="../css/style.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
 </head>
 
@@ -50,7 +43,7 @@ if (isset($_SESSION['query'])) {
             </div>
         </div>
         <div>
-            <a class="d-flex flex-columns align-items-center justify-content-center" href="index.php">
+            <a class="d-flex flex-columns align-items-center justify-content-center" href="../index.php">
                 <button class="btn rounded-pill btn-mine-light ">
                     <span class="poppins fw-normal"> &lt;</span> Torna alla Home
                 </button>
@@ -67,30 +60,37 @@ if (isset($_SESSION['query'])) {
                             Visualizzazione
                         </p>
                         <h3 class="m-0 p-0 fw-bold">
-                            <?php
-                            echo $title;
-                            ?>
+                            Personale per Reparto
                         </h3>
                     </div>
-                    <?php
-                    if ($table && $actions) {
-                        echo <<<EOD
-                        <div>
-                            <a class="d-flex flex-columns align-items-center justify-content-center" href="">
-                                <form method="POST" action="opmanager.php">
-                                    <input type="hidden" name="operation" value="goto_insert">
-                                    <input type="hidden" name="table" value="{$table}">
-                                    <button class="btn rounded-pill btn-mine" type="submit">
-                                        <span class="poppins fw-normal"> &gt;</span> Inserisci nella Tabella
-                                    </button>
-                                </form>
-                            </a>
-                        </div>
-                    EOD;
-                    } ?>
+                    <div>
+                        <a class="d-flex flex-columns align-items-center justify-content-center" href="">
+                            <form method="POST" action="../opmanager.php">
+                                <input type="hidden" name="operation" value="goto_view">
+                                <input type="hidden" name="table" value="personale">
+                                <button class="btn rounded-pill btn-mine" type="submit">
+                                    <span class="poppins fw-normal"> &gt;</span> Visualizza la Tabella
+                                </button>
+                            </form>
+                        </a>
+                    </div>
                 </div>
-                <div class="d-flex justify-content-center mt-3">
-                   <?php echo showTable() ?>
+                <div class="m-3">
+                    <form method="POST" action="personalereparto.php">
+                        <?php
+                            echo showForm($selected);
+                        ?>
+
+                        <input class="btn rounded-pill btn-mine" type="submit" value="Visualizza">
+                    </form>
+
+                    <div class="d-flex justify-content-center mt-3">
+                        <?php
+                        if ($selected) {
+                            echo showTable($selected);
+                        }
+                        ?>
+                    </div>
                 </div>
             </div>
         </div>
@@ -116,29 +116,43 @@ if (isset($_SESSION['query'])) {
 
 <?php
 
-function showTable() {
-    global $query, $actions, $table;
-    $connection = connectToDatabase();
+function showForm($selected = NULL)
+{
+    global $connection;
 
+    $query = "SELECT * FROM reparto";
     try {
-        $results = executeQuery($connection, $query);
+        $results = pg_fetch_all(executeQuery($connection, $query));
     } catch (Exception $e) {
         memorizeError("Lettura dal Database", $e->getMessage());
+        exit();
+        header("Refresh:0");
+    }
+    $reparti = array_map(fn ($el) => $el['codice'], $results);
+    $visualized = array_map(fn ($el) => "({$el['ospedale']}) Reparto {$el['codice']} - {$el['nome']}", $results);
+    return buildInputSelect("Reparto", $reparti, true, true, $selected, $visualized);
+}
+
+function showTable($reparto)
+{
+    global $connection;
+
+    $query = <<<QRY
+    SELECT *
+    FROM personale
+    WHERE reparto = $1
+    QRY;
+    try {
+        $results = executeQuery($connection, $query, array($reparto));
+    } catch (Exception $e) {
+        memorizeError("Ricerca Personale nel Reparto", $e->getMessage());
         header("Refresh:0");
         exit();
     }
     $columns = getColumnsByResults($results);
     $resultData = pg_fetch_all($results);
 
-    return buildTable($resultData, $columns, $table, $actions);
-}
-
-function getTable()
-{
-    if (isset($_SESSION['table'])) {
-        return $_SESSION['table'];
-    }
-    return null;
+    return buildTable($resultData, $columns);
 }
 
 ?>

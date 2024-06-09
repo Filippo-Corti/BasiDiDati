@@ -8,6 +8,7 @@ foreach (glob("modules/*.php") as $filename) {
 $table = $_SESSION['table'];
 $actions = $_SESSION['logged_user']['type'] == 'worker';
 
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
