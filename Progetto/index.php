@@ -5,6 +5,7 @@ foreach (glob("modules/*.php") as $filename) {
     include $filename;
 }
 
+
 ?>
 <!DOCTYPE html>
 <html lang="en">

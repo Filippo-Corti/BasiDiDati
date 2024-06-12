@@ -32,12 +32,12 @@ function buildToast($id, $type, $title, $content)
 {
 
     switch ($type) {
-        case NotificationType::Success:
+        case "success":
             $bgClass = 'success';
             $icon = 'check.svg';
             $appearenceTime = "5000";
             break;
-        case NotificationType::Error:
+        case "error":
             $bgClass = 'danger';
             $icon = 'exclamation.svg';
             $appearenceTime = "20000";
