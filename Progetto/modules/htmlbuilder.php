@@ -69,12 +69,14 @@ function buildAppointmentsTimeline($appointments)
     foreach ($appointments as $app) {
         $urgency = getUrgencyColor($app['urgenza']);
         $regime = ($app['regimeprivato']) ? "Regime Privato ({$app['costo']}€)" : "Regime Assistenziale ({$app['costo']}€)";
+        $avvertenze = ($app['avvertenze']) ? $app['avvertenze'] : "Nessuna";
         $str .= <<<EOD
             <div class="tl-item">
                 <div class="tl-dot b-{$urgency}"></div>
                 <div class="tl-content">
                     <div class="fw-semibold">{$app['descrizione']}</div>
                     <div>Presso {$app['indirizzo']} con {$regime}</div>
+                    <div>Avvertenze: {$avvertenze} </div>
                     <div class="tl-date text-muted mt-1">Il {$app['dataesame']} alle {$app['oraesame']}</div>
                 </div>
             </div>
@@ -85,6 +87,9 @@ function buildAppointmentsTimeline($appointments)
 
 function buildAppointmentRequestsTable($results) {
     //Intestation
+    if(!$results) {
+        return;
+    }
     $str = '<table class="w-100">';
     $str .= '<tr>';
     foreach ($results[0] as $col => $v) {
@@ -111,7 +116,6 @@ function buildAppointmentRequestsTable($results) {
     }
     return $str . '</table>';
 }
-
 
 function buildInputText($name, $minsize, $maxsize, $required, $editable = true, $value = NULL)
 {

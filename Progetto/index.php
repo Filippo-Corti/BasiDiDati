@@ -102,7 +102,6 @@ function loadPatientHomePage()
     $latestHospitalization = getPatientLatestHospitalization($connection, $loggedUser['username']);
     $diagnosis = getDiagnosis($connection, $latestHospitalization['codice']);
 
-
     $userTimeline = buildAppointmentsTimeline($userAppointments);
     $dataFine = $latestHospitalization['ospedale'] or "IN CORSO";
 

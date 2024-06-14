@@ -90,10 +90,10 @@ function getWorkerInfo($connection, $cf)
 function getPatientFutureAppointments($connection, $cf)
 {
     $query = <<<QRY
-        SELECT P.*, E.descrizione, 
+        SELECT P.*, E.descrizione, ES.avvertenze,
         CASE
-            WHEN LE.cap IS NOT NULL THEN '(' || LE.cap || ') ' || 'Via ' || LE.via || ', ' || LE.cap  
-            WHEN O.cap IS NOT NULL THEN '(' || O.cap || ') ' || 'Via ' || O.via || ', ' || O.cap  
+            WHEN LE.cap IS NOT NULL THEN '(' || LE.cap || ') ' || LE.via || ', ' || LE.cap  
+            WHEN O.cap IS NOT NULL THEN '(' || O.cap || ') ' || O.via || ', ' || O.cap  
         END AS indirizzo,
         CASE
             WHEN regimeprivato THEN E.costoprivato
@@ -105,7 +105,7 @@ function getPatientFutureAppointments($connection, $cf)
             LEFT JOIN LaboratorioInterno LI ON LI.codice = L.codice
             LEFT JOIN Reparto R ON LI.reparto = R.codice
             LEFT JOIN Ospedale O ON R.ospedale = O.codice
-
+            LEFT JOIN EsameSpecialistico ES ON P.esame = ES.codice 
         WHERE paziente = $1
         AND dataesame >= CURRENT_DATE
         ORDER BY dataesame;
