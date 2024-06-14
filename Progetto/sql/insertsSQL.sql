@@ -18,14 +18,16 @@ INSERT INTO Paziente (CF, NumeroTessera, Nome, Cognome, dataNascita, CAP, Via, n
 ('RSTPPL92H01H501T', '71234567890123456789', 'Paolo', 'Rossi', '1992-08-01', '91100', 'Via Fardella', 21),
 ('LNSFNC74L01H501D', '81234567890123456789', 'Franco', 'Lanza', '1974-12-01', '98121', 'Viale San Martino', 17),
 ('FRNCLL80B01F205N', '91234567890123456789', 'Luca', 'Franchi', '1980-02-01', '42121', 'Corso Garibaldi', 13),
-('NVRLUI85L01H501M', '10123456789012345678', 'Luigi', 'Neri', '1985-12-01', '57123', 'Via Grande', 23);
+('NVRLUI85L01H501M', '10123456789012345678', 'Luigi', 'Neri', '1985-12-01', '57123', 'Via Grande', 23),
+('CRTFPP03S07L319C', '10123456789012345656', 'Filippo', 'Corti', '2003-11-07', '22073', 'Via XXV Aprile', 15);
 
 INSERT INTO UtenzaPaziente (Paziente, HashedPassword) VALUES 
 ('RSSMRA85M01H501Z', '$2y$10$PS9.85xHgvwHBmfGq1PQ9uGVicvWUPp3lrshlWhUvntU2JbZrQWYW'), --Password: 1234
 ('VRDLGI92F02L219V', '$2y$10$PS9.85xHgvwHBmfGq1PQ9uGVicvWUPp3lrshlWhUvntU2JbZrQWYW'), --Password: 1234
 ('BNCLRA70A01F205Z', '$2y$10$PS9.85xHgvwHBmfGq1PQ9uGVicvWUPp3lrshlWhUvntU2JbZrQWYW'), --Password: 1234
 ('FRNCRL88C01H501B', '$2y$10$PS9.85xHgvwHBmfGq1PQ9uGVicvWUPp3lrshlWhUvntU2JbZrQWYW'), --Password: 1234
-('SNTGPP95D12M208V', '$2y$10$PS9.85xHgvwHBmfGq1PQ9uGVicvWUPp3lrshlWhUvntU2JbZrQWYW'); --Password: 1234
+('SNTGPP95D12M208V', '$2y$10$PS9.85xHgvwHBmfGq1PQ9uGVicvWUPp3lrshlWhUvntU2JbZrQWYW'), --Password: 1234
+('CRTFPP03S07L319C', '$2y$10$PS9.85xHgvwHBmfGq1PQ9uGVicvWUPp3lrshlWhUvntU2JbZrQWYW'); --Password: 1234
 
 
 INSERT INTO Ospedale (Codice, Nome, CAP, Via, nCiv) VALUES 
@@ -380,7 +382,9 @@ INSERT INTO Ricovero (Codice, Paziente, Reparto, Stanza, DataInizio, DataFine) V
 ('RIC08', 'RSTPPL92H01H501T', 'RP005', 501, '2023-12-01', NULL),
 ('RIC09', 'LNSFNC74L01H501D', 'RP005', 901, '2024-01-05', NULL),
 ('RIC10', 'FRNCLL80B01F205N', 'RP006', 601, '2024-02-15', '2024-02-25'),
-('RIC11', 'FRNCLL80B01F205N', 'RP006', 601, '2024-06-01', '2024-06-01');
+('RIC11', 'FRNCLL80B01F205N', 'RP006', 601, '2024-06-01', '2024-06-01'),
+('RIC12', 'CRTFPP03S07L319C', 'RP002', 703, '2024-06-01', '2024-06-01'),
+('RIC13', 'CRTFPP03S07L319C', 'RP002', 703, '2024-06-02', NULL);
 
 
 INSERT INTO RicoveroPatologia (Ricovero, Patologia) VALUES 
@@ -389,7 +393,10 @@ INSERT INTO RicoveroPatologia (Ricovero, Patologia) VALUES
 ('RIC03', 'Bipolarismo'),
 ('RIC06', 'Osteoporosi'),
 ('RIC07', 'Diabete tipo 1'),
-('RIC10','Diabete tipo 2');
+('RIC10', 'Diabete tipo 2'),
+('RIC12', 'Bipolarismo'),
+('RIC13', 'Bipolarismo'),
+('RIC13', 'Anoressia nervosa');
 
 
 INSERT INTO Esame (Codice, Descrizione, CostoAssistenza, CostoPrivato) VALUES
@@ -438,7 +445,10 @@ INSERT INTO Prenotazione (Paziente, Esame, DataEsame, OraEsame, Laboratorio, Dat
 ('FRNCRL88C01H501B', 'ES011', '2024-05-03', '12:45:00', 'LAB04', '2024-05-03', 'Rosso', TRUE, 'BRNLSR70H18H501H'),
 ('VRDLGI92F02L219V', 'ES014', '2024-05-04', '14:30:00', 'LAB07', '2024-05-04', 'Rosso', FALSE, 'CLMNDR75B12H501S'),
 ('RSSMRA85M01H501Z', 'ES007', '2024-05-05', '16:00:00', 'LAB05', '2024-05-05', 'Giallo', TRUE, 'FRNMRZ88D09H501N'),
-('FRNCLL80B01F205N', 'ES007', '2024-05-06', '09:45:00', 'LAB10', '2024-05-06', 'Verde', FALSE, 'VRNZLS88L03H501T');
+('FRNCLL80B01F205N', 'ES007', '2024-05-06', '09:45:00', 'LAB10', '2024-05-06', 'Verde', FALSE, 'VRNZLS88L03H501T'),
+('CRTFPP03S07L319C', 'ES001', '2025-05-06', '09:45:00', 'LAB08', '2024-05-06', 'Verde', FALSE, NULL),
+('CRTFPP03S07L319C', 'ES019', '2025-01-08', '11:45:00', 'LAB09', '2024-05-06', 'Giallo', FALSE, NULL),
+('CRTFPP03S07L319C', 'ES014', '2024-12-16', '12:00:00', 'LAB10', '2024-05-06', 'Rosso', TRUE, 'MLTLUC81B17H501M');
 
 
 INSERT INTO OrarioAperturaLaboratorio (Laboratorio, GiornoSettimana, OraApertura, OraChiusura) VALUES
